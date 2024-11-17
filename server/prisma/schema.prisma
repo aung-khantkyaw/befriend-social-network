@@ -1,0 +1,164 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User{
+  id Int @id @default(autoincrement())
+  name String
+  username String @unique
+  email String @unique
+  password String
+  profile String?
+  bio String?
+  gender String?
+  dob DateTime?
+  liveIn String?
+  relationship String?
+  partner String?
+  school String?
+  college String?
+  university String?
+  work String?
+  annidate DateTime?
+
+  links UserLink[]
+  friendships Friendship[] @relation("UserFriendships")
+  friends Friendship[] @relation("FriendUser")
+  posts Post[]
+  shares Share[]
+  likes Like[]
+  comments Comment[]
+  replies ReplyComment[]
+  receive Notification[] @relation("Receiver")
+  send Notification[] @relation("Sender")
+
+  lastLogin DateTime @default(now())
+  isVerified Boolean @default(false)
+  resetPasswordToken String?
+  resetPasswordExpiresAt DateTime?
+  verificationToken String?
+  verificationTokenExpiresAt DateTime?
+  isBanned Boolean @default(false)
+  BannedExpiresAt DateTime?
+  created DateTime @default(now())
+}
+
+model UserLink{
+  id      Int     @id @default(autoincrement())
+  type    String  
+  url     String
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  Int
+}
+
+model Friendship{
+  id        Int     @id @default(autoincrement())
+  user      User    @relation("UserFriendships", fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  friend    User    @relation("FriendUser", fields: [friendId], references: [id], onDelete: Cascade)
+  friendId  Int
+  status    String  
+  createdAt DateTime @default(now())
+}
+
+model Post{
+  id Int @id @default(autoincrement())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
+  content String
+  createdAt DateTime @default(now())
+
+  medias PostMedia[]
+  likes Like[]
+  comments Comment[]
+  shares Share[]
+
+  updatedAt DateTime?
+}
+
+model PostMedia{
+  id Int @id @default(autoincrement())
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId Int
+  mediaUrl String
+  mediaType String
+  createdAt DateTime @default(now())
+}
+
+model Share{
+  id Int @id @default(autoincrement())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId Int
+
+  likes Like[]
+  comments Comment[]
+
+  createdAt DateTime @default(now())
+}
+
+model Comment{
+  id Int @id @default(autoincrement())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
+  post Post? @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId Int?
+  share Share? @relation(fields: [shareId], references: [id], onDelete: Cascade)
+  shareId Int?
+  content String
+  
+  replies ReplyComment[]
+  likes Like[]
+
+  createdAt DateTime @default(now())
+}
+
+model ReplyComment{
+  id Int @id @default(autoincrement())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
+  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  commentId Int
+  content String
+
+  likes Like[]
+
+  createdAt DateTime @default(now())
+}
+
+model Like{
+  id Int @id @default(autoincrement())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
+  post Post? @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId Int?
+  share Share? @relation(fields: [shareId], references: [id], onDelete: Cascade)
+  shareId Int?
+  comment Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  commentId Int?
+  replyComment ReplyComment? @relation(fields: [replyId], references: [id], onDelete: Cascade)
+  replyId Int?
+  createdAt DateTime @default(now())
+}
+
+model Notification{
+  id Int @id @default(autoincrement())
+  user User @relation("Receiver", fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
+  sender User @relation("Sender", fields: [senderId], references: [id], onDelete: Cascade)
+  senderId Int
+  type String
+  targetId Int?
+  targetType String?
+  isRead Boolean @default(false)
+  createdAt DateTime @default(now())
+}
