@@ -21,5 +21,8 @@ export function auth(req, res, next) {
 
   res.locals.user = user;
 
+  // const { id, username } = user;
+  // res.locals.user = { id, username };
+
   next();
 }

@@ -312,6 +312,15 @@ export const getUserData = async (req, res) => {
       },
       include: {
         links: true,
+        posts: {
+          include: {
+            medias: true,
+            comments: true,
+            likes: true,
+            shares: true,
+          },
+          orderBy: { id: "desc" },
+        },
       },
     });
 
@@ -483,6 +492,9 @@ export const updateAvatar = async (req, res) => {
   const { username } = req.body;
   const file = req.file;
 
+  console.log("Username:", username);
+  console.log("File:", file);
+
   if (!file) {
     return res.status(400).json({ message: "No file uploaded." });
   }
@@ -515,7 +527,18 @@ export const updateAvatar = async (req, res) => {
 };
 
 export const verify = async (req, res) => {
-  const user = res.locals.user;
+  const userId = res.locals.user.id;
+
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+    include: {
+      links: true,
+      posts: true,
+    },
+  });
+
   res.status(200).json({
     data: { ...user, password: null },
   });

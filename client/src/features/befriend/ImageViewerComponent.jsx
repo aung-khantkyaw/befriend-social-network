@@ -4,21 +4,26 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function ImageViewerPage({ images }) {
-    const [currentIndex, setCurrentIndex] = useState(0)
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const api = import.meta.env.VITE_API_URL;
 
   const handlePrevious = () => {
-    setCurrentIndex((prevIndex) => (prevIndex > 0 ? prevIndex - 1 : images.length - 1))
-  }
+    setCurrentIndex((prevIndex) =>
+      prevIndex > 0 ? prevIndex - 1 : images.length - 1
+    );
+  };
 
   const handleNext = () => {
-    setCurrentIndex((prevIndex) => (prevIndex < images.length - 1 ? prevIndex + 1 : 0))
-  }
+    setCurrentIndex((prevIndex) =>
+      prevIndex < images.length - 1 ? prevIndex + 1 : 0
+    );
+  };
 
   return (
     <div className="relative">
       <img
-        src={images[currentIndex].url}
-        alt={`Image ${currentIndex + 1}`}
+        src={api + "/" + images[currentIndex].mediaUrl}
+        alt={`Image ${currentIndex + 1} ${api + "/" + images[currentIndex].mediaUrl}`}
         width={800}
         height={600}
         className="max-w-full h-auto"
@@ -49,7 +54,7 @@ export default function ImageViewerPage({ images }) {
         </>
       )}
     </div>
-  )
+  );
 }
 
 ImageViewerPage.propTypes = {

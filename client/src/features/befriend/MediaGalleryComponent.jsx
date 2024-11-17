@@ -6,17 +6,18 @@ import ImageViewerPage from "./ImageViewerComponent";
 
 export default function MediaGalleryComponent({ media }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const api = import.meta.env.VITE_API_URL;
 
   if (media.length === 1) {
     const item = media[0];
     return (
       <div>
-        {item.type === "image" ? (
+        {item.mediaType == "image" ? (
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <div className="rounded-lg overflow-hidden cursor-pointer">
                 <img
-                  src={item.url}
+                  src={api + "/" + item.mediaUrl}
                   alt="Post image"
                   className="w-full h-auto"
                 />
@@ -32,10 +33,7 @@ export default function MediaGalleryComponent({ media }) {
             className="w-full h-auto"
             style={{ maxHeight: "400px" }}
           >
-            <source
-              src={item.url}
-              type="video/mp4"
-            />
+            <source src={item.url} type="video/mp4" />
             Your browser does not support the video tag.
           </video>
         )}
@@ -58,8 +56,8 @@ export default function MediaGalleryComponent({ media }) {
                 }`}
               >
                 <img
-                  src={item.url}
-                  alt={`Post image ${index + 1}`}
+                  src={api + "/" + item.mediaUrl}
+                  alt={`Post ${index + 1}`}
                   width={300}
                   height={200}
                   className="w-full h-full object-cover"
@@ -74,7 +72,7 @@ export default function MediaGalleryComponent({ media }) {
           )}
         </div>
       </DialogTrigger>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-w-xl">
         <ImageViewerPage images={media} />
       </DialogContent>
     </Dialog>
