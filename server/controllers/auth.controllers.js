@@ -312,12 +312,40 @@ export const getUserData = async (req, res) => {
       },
       include: {
         links: true,
+        friends: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                username: true,
+                profile: true,
+              },
+            },
+          },
+        },
+        friendships: {
+          where: {
+            status: "active",
+          },
+          include: {
+            friend: {
+              select: {
+                id: true,
+                name: true,
+                username: true,
+                profile: true,
+              },
+            },
+          },
+        },
         posts: {
           include: {
             medias: true,
             comments: true,
             likes: true,
             shares: true,
+            user: true,
           },
           orderBy: { id: "desc" },
         },
@@ -535,7 +563,43 @@ export const verify = async (req, res) => {
     },
     include: {
       links: true,
-      posts: true,
+      friends: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              username: true,
+              profile: true,
+            },
+          },
+        },
+      },
+      friendships: {
+        where: {
+          status: "active",
+        },
+        include: {
+          friend: {
+            select: {
+              id: true,
+              name: true,
+              username: true,
+              profile: true,
+            },
+          },
+        },
+      },
+      posts: {
+        include: {
+          medias: true,
+          comments: true,
+          likes: true,
+          shares: true,
+          user: true,
+        },
+        orderBy: { id: "desc" },
+      },
     },
   });
 

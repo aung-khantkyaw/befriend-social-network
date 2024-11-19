@@ -1,15 +1,17 @@
+import VerifyEmailPage from "@/features/auth/VerifyEmailPage";
 import AuthLayout from "@/layouts/AuthLayout";
 import MainLayout from "@/layouts/MainLayout";
 import { authService } from "@/services/authService";
-import VerifyEmailPage from "@/features/auth/VerifyEmailPage";
 
 export default function Home() {
-  const { isAuthenticated, user } = authService();
+  const { user } = authService();
+  const token = localStorage.getItem("token");
+
   const isVerified = user?.isVerified;
 
   return (
     <div>
-      {isAuthenticated ? (
+      {token ? (
         <>{isVerified ? <AuthLayout /> : <VerifyEmailPage />}</>
       ) : (
         <MainLayout />

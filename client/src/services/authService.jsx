@@ -8,7 +8,6 @@ const token = localStorage.getItem("token");
 
 export const authService = create((set) => ({
   user: null,
-  isAuthenticated: false,
   errorType: null,
   errorMessage: null,
   successType: null,
@@ -25,11 +24,10 @@ export const authService = create((set) => ({
       });
 
       const json = await res.json();
-      console.log("Response from verify:", json);
+      // console.log("Response from verify:", json.data);
 
       set({
         user: json.data,
-        isAuthenticated: true,
         isLoading: false,
         isCheckingAuth: false,
       });
@@ -66,17 +64,16 @@ export const authService = create((set) => ({
           username: json.data.username,
           profile: `${ImageAPI_URL}/${json.data.profile}`,
           isVerified: json.data.isVerified,
+          email: json.data.email,
         };
 
         set({
           user: user,
-          isAuthenticated: true,
           errorType: null,
           errorMessage: null,
         });
 
         localStorage.setItem("user", JSON.stringify(user));
-        localStorage.setItem("isAuthenticated", "true");
         localStorage.setItem("token", json.token);
 
         console.log("State after registration:", { user: json.data });
@@ -119,11 +116,11 @@ export const authService = create((set) => ({
           username: json.data.username,
           profile: `${ImageAPI_URL}/${json.data.profile}`,
           isVerified: json.data.isVerified,
+          email: json.data.email,
         };
 
         set({
           user: user,
-          isAuthenticated: true,
         });
 
         localStorage.setItem("user", JSON.stringify(user));
@@ -203,18 +200,17 @@ export const authService = create((set) => ({
           username: json.data.username,
           profile: `${ImageAPI_URL}/${json.data.profile}`,
           isVerified: json.data.isVerified,
+          email: json.data.email,
         };
 
         set({
           user: user,
-          isAuthenticated: true,
           errorType: null,
           errorMessage: null,
         });
 
-        // localStorage.setItem("user", JSON.stringify(user));
-        // localStorage.setItem("isAuthenticated", "true");
         localStorage.setItem("token", json.token);
+        localStorage.removeItem("user");
 
         console.log("State after login:", { user: json.data }); // Log the updated state
       }
@@ -348,12 +344,10 @@ export const authService = create((set) => ({
 
       if (json.success === "true") {
         localStorage.removeItem("user");
-        localStorage.removeItem("isAuthenticated");
         localStorage.removeItem("token");
 
         set({
           user: null,
-          isAuthenticated: false,
           errorType: null,
           errorMessage: null,
         });
@@ -385,12 +379,10 @@ export const authService = create((set) => ({
 
       if (json.success === "true") {
         localStorage.removeItem("user");
-        localStorage.removeItem("isAuthenticated");
         localStorage.removeItem("token");
 
         set({
           user: null,
-          isAuthenticated: false,
           errorType: null,
           errorMessage: null,
         });
@@ -432,6 +424,7 @@ export const authService = create((set) => ({
           username: json.data.username,
           profile: `${ImageAPI_URL}/${json.data.profile}`,
           isVerified: json.data.isVerified,
+          email: json.data.email,
         };
 
         set({
@@ -484,6 +477,7 @@ export const authService = create((set) => ({
           username: json.data.username,
           profile: `${ImageAPI_URL}/${json.data.profile}`,
           isVerified: json.data.isVerified,
+          email: json.data.email,
         };
 
         set({

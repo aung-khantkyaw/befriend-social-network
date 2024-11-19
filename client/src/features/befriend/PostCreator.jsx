@@ -1,10 +1,7 @@
-"use client";
-
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
 import { Image, Video, X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import {
@@ -15,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { authService } from "@/services/authService";
 import { beFriendService } from "@/services/beFriendService";
+import { Mention, MentionsInput } from "react-mentions";
 
 export default function PostCreator() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -22,12 +20,57 @@ export default function PostCreator() {
   const [mediaFiles, setMediaFiles] = useState([]);
   const fileInputRef = useRef(null);
   const { user } = authService();
-  const { createPost, successType, successMessage, errorType, errorMessage } =
-    beFriendService();
+  const {
+    getPosts,
+    createPost,
+    successType,
+    successMessage,
+    errorType,
+    errorMessage,
+  } = beFriendService();
   const api = import.meta.env.VITE_API_URL;
+
+  const [friendlist, setFriendlist] = useState([]);
+
+  const friends = user?.friends;
+  const friendships = user?.friendships;
+
+  useEffect(() => {
+    let allFriends = [];
+
+    friends?.forEach((friend) => {
+      allFriends.push({ id: friend.user.username, display: friend.user.name });
+    });
+
+    friendships?.forEach((friendship) => {
+      allFriends.push({
+        id: friendship.friend.username,
+        display: friendship.friend.name,
+      });
+    });
+
+    setFriendlist(allFriends);
+  }, [friends, friendships]);
+
+  const convertTextToHTML = (inputText) => {
+    const mentionRegex = /@\[(.+?)\]\((.+?)\)/g;
+    const hashtagRegex = /#(\w+)/g;
+
+    let result = inputText.replace(mentionRegex, (match, username, link) => {
+      return `<a href="${link}" class="text-sm text-blue-500">${username}</a>`;
+    });
+
+    result = result.replace(hashtagRegex, (match, hashtag) => {
+      return `<span class="text-sm font-bold text-blue-500">${match}</span>`;
+    });
+
+    return result;
+  };
 
   const handleContentChange = (e) => {
     setContent(e.target.value);
+    console.log(e.target.value);
+    console.log(convertTextToHTML(e.target.value));
   };
 
   const handleFileSelect = (e) => {
@@ -94,7 +137,7 @@ export default function PostCreator() {
 
   const handlePost = async () => {
     const formData = new FormData();
-    formData.append("content", content);
+    formData.append("content", convertTextToHTML(content));
     mediaFiles.forEach((media) => {
       formData.append("mediaFiles", media.file);
     });
@@ -104,6 +147,8 @@ export default function PostCreator() {
       await createPost(formData);
       setContent("");
       setMediaFiles([]);
+      setIsDialogOpen(false);
+      await getPosts();
     } catch (error) {
       toast({
         title: "Post creation failed",
@@ -138,16 +183,18 @@ export default function PostCreator() {
           <CardContent className="pt-4">
             <div className="flex items-start space-x-4">
               <Avatar>
-                <AvatarImage src={api + "/" + user.profile} alt="User" />
-                <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                <AvatarImage src={api + "/" + user?.profile} alt="User" />
+                <AvatarFallback>{user?.name.charAt(0)}</AvatarFallback>
               </Avatar>
               <div className="flex-grow space-y-4">
-                <Textarea
+                <MentionsInput
                   placeholder="What's on your mind?"
                   value={content}
                   onChange={handleContentChange}
                   className="min-h-[100px]"
-                />
+                >
+                  <Mention data={friendlist} />
+                </MentionsInput>
                 {mediaFiles.length > 0 && (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                     {mediaFiles.map((media, index) => (

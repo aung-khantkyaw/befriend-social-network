@@ -4,7 +4,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -19,8 +18,6 @@ import {
   LinkedinIcon,
   TwitterIcon,
   InstagramIcon,
-  ThumbsUp,
-  MessageCircle,
 } from "lucide-react";
 import { authService } from "@/services/authService";
 import { formatDate, lastLogin, DateFormatter } from "@/lib/utils";
@@ -29,10 +26,7 @@ import { useEffect, useState } from "react";
 import ErrorPage from "@/components/ui/error";
 import Header from "@/components/Header";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import Newsfeed from "./Newsfeed";
 import PostPage from "@/features/befriend/PostPage";
-import MediaGalleryComponent from "@/features/befriend/MediaGalleryComponent";
-import { Button } from "@/components/ui/button";
 
 const getLinkIcon = (type) => {
   switch (type) {
@@ -52,19 +46,19 @@ const getLinkIcon = (type) => {
 };
 
 export default function Profile() {
-  const { getUserData, likePost, unlikePost } = authService();
+  const { getUserData } = authService();
   const { username } = useParams();
   const [user, setUser] = useState(null);
   const avatar = `${api}/${user?.profile}`;
 
-  const actions = {
-    likePost: async (postId, userId) => {
-      /* function implementation */
-    },
-    unlikePost: async (postId, userId) => {
-      /* function implementation */
-    },
-  };
+  // const actions = {
+  //   likePost: async (postId, userId) => {
+  //     /* function implementation */
+  //   },
+  //   unlikePost: async (postId, userId) => {
+  //     /* function implementation */
+  //   },
+  // };
 
   useEffect(() => {
     async function fetchProfile() {
@@ -196,45 +190,7 @@ export default function Profile() {
         </div>
 
         {user.posts?.map((post) => (
-          <Card key={post.id} className="mb-6 max-w-xl mx-auto">
-            <CardHeader>
-              <div className="flex items-center space-x-4">
-                <Avatar>
-                  <AvatarImage src={api + "/" + user.profile} alt={user.name} />
-                  <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="font-semibold">{user.name}</p>
-                  <p className="text-sm text-gray-500">{post.timestamp}</p>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="mb-4">{post.content}</p>
-              {post.medias && <MediaGalleryComponent media={post.medias} />}
-            </CardContent>
-            <CardFooter className="flex justify-between items-center">
-              <div className="flex space-x-4">
-                <Button
-                  onClick={
-                    post.likes.includes(user.id)
-                      ? () => actions.unlikePost(post.id, user.id)
-                      : () => actions.likePost(post.id, user.id)
-                  }
-                >
-                  {post.likes.includes(user.id) ? "Unlike" : "Like"}
-                </Button>
-                <Button variant="ghost" className="flex items-center space-x-2">
-                  <MessageCircle className="w-4 h-4" />
-                  <span>Comment ({post?.comments.length})</span>
-                </Button>
-                {/* <Button variant="ghost" className="flex items-center space-x-2">
-            <Share2 className="w-4 h-4" />
-            <span>Share</span>
-          </Button> */}
-              </div>
-            </CardFooter>
-          </Card>
+          <PostPage key={post.id} post={post} />
         ))}
       </ScrollArea>
     </div>

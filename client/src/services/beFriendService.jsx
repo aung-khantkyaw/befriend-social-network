@@ -12,7 +12,7 @@ export const beFriendService = create((set) => ({
 
   getPosts: async () => {
     try {
-      const response = await fetch(`${API_URL}/posts`, {
+      const response = await fetch(`${API_URL}/get-posts`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -22,7 +22,31 @@ export const beFriendService = create((set) => ({
       const data = await response.json();
 
       set({
-        posts: data,
+        allPosts: data,
+        isLoading: false,
+      });
+    } catch (error) {
+      set({
+        errorType: "posts",
+        errorMessage: error.message,
+        isLoading: false,
+      });
+    }
+  },
+
+  getFriendPosts: async (userId) => {
+    try {
+      const response = await fetch(`${API_URL}/getFriendPosts/${userId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+
+      set({
+        friendPosts: data,
         isLoading: false,
       });
     } catch (error) {
@@ -62,6 +86,47 @@ export const beFriendService = create((set) => ({
     } catch (error) {
       set({
         errorType: "createPost",
+        errorMessage: error.message,
+        isLoading: false,
+      });
+    }
+  },
+
+  editPost: async (postId, content) => {
+    console.log("Editing post:", postId, content);
+  },
+
+  deletePost: async (postId) => {
+    const token = localStorage.getItem("token");
+    console.log("Deleting post:", postId);
+    console.log("Token:", token);
+    try {
+      const response = await fetch(`${API_URL}/delete-post/${postId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.status !== 200) {
+        set({
+          errorType: "deletePost",
+          errorMessage: data.error,
+          isLoading: false,
+        });
+        throw new Error(data.error);
+      }
+
+      set({
+        successType: "deletePost",
+        successMessage: data.message,
+        isLoading: false,
+      });
+    } catch (error) {
+      set({
+        errorType: "deletePost",
         errorMessage: error.message,
         isLoading: false,
       });
@@ -132,6 +197,30 @@ export const beFriendService = create((set) => ({
     } catch (error) {
       set({
         errorType: "unlikePost",
+        errorMessage: error.message,
+        isLoading: false,
+      });
+    }
+  },
+
+  getFriends: async (userId) => {
+    try {
+      const response = await fetch(`${API_URL}/get-friends/${userId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+
+      set({
+        friends: data,
+        isLoading: false,
+      });
+    } catch (error) {
+      set({
+        errorType: "posts",
         errorMessage: error.message,
         isLoading: false,
       });

@@ -1,5 +1,5 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Home from "@/pages/Home.jsx";
 import Account from "@/pages/Account.jsx";
 import Login from "@/features/auth/LoginPage.jsx";
@@ -12,16 +12,35 @@ import ForgotPasswordPage from "@/features/auth/ForgotPasswordPage";
 import ResetPasswordPage from "@/features/auth/ResetPasswordPage";
 import AppSocket from "./AppSocket";
 import { beFriendService } from "./services/beFriendService";
-function App() {
-  const { isAuthenticated, isLoading, isCheckingAuth, loadAuthState } =
-    authService();
+import FriendList from "./features/befriend/FriendList";
 
-  const { getPosts } = beFriendService();
+function App() {
+  const { user, isLoading, isCheckingAuth, loadAuthState } = authService();
+  const { getFriendPosts, getPosts } = beFriendService();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
-    loadAuthState();
-    getPosts();
-  }, [loadAuthState, getPosts]);
+    const checkAuth = async () => {
+      await loadAuthState();
+      if (token) {
+        setIsAuthenticated(true);
+        try {
+          await getPosts();
+          if (user && user.id) {
+            await getFriendPosts(user.id);
+          }
+        } catch (error) {
+          console.error("Error fetching posts:", error);
+        }
+      } else {
+        setIsAuthenticated(false);
+      }
+    };
+
+    checkAuth();
+  }, [loadAuthState, getPosts, getFriendPosts, token, user]);
 
   if (isLoading || isCheckingAuth) {
     return <Loading />;
@@ -54,21 +73,17 @@ function App() {
       children: [
         { path: "/account", element: <Account /> },
         { path: "/:username", element: <Profile /> },
-
         { path: "/squads", element: <div>Squads</div> },
         { path: "/squads/:squad", element: <div>Squad</div> },
         { path: "/squads/create", element: <div>Create Squad</div> },
         { path: "/squads/my-squads", element: <div>My Squads</div> },
-
         { path: "/channels", element: <div>Channels</div> },
         { path: "/channels/:channel", element: <div>Channel</div> },
         { path: "/channels/create", element: <div>Create Channel</div> },
         { path: "/channels/my-channels", element: <div>My Channels</div> },
-
-        { path: "/friends", element: <div>Friend List</div> },
+        { path: "/friends", element: <FriendList /> },
         { path: "/chat", element: <div>Chat</div> },
         { path: "/chat/:username", element: <div>Chat with</div> },
-
         { path: "/notifications", element: <div>Notifications</div> },
       ],
     },

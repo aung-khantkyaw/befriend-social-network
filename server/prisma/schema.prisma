@@ -80,6 +80,7 @@ model Post{
   likes Like[]
   comments Comment[]
   shares Share[]
+  notis Notification[]
 
   updatedAt DateTime?
 }
@@ -102,6 +103,7 @@ model Share{
 
   likes Like[]
   comments Comment[]
+  notis Notification[]
 
   createdAt DateTime @default(now())
 }
@@ -118,6 +120,7 @@ model Comment{
   
   replies ReplyComment[]
   likes Like[]
+  notis Notification[]
 
   createdAt DateTime @default(now())
 }
@@ -131,6 +134,7 @@ model ReplyComment{
   content String
 
   likes Like[]
+  notis Notification[]
 
   createdAt DateTime @default(now())
 }
@@ -157,8 +161,15 @@ model Notification{
   sender User @relation("Sender", fields: [senderId], references: [id], onDelete: Cascade)
   senderId Int
   type String
-  targetId Int?
-  targetType String?
   isRead Boolean @default(false)
+  
+  post Post? @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId Int?
+  share Share? @relation(fields: [shareId], references: [id], onDelete: Cascade)
+  shareId Int?
+  comment Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  commentId Int?
+  replyComment ReplyComment? @relation(fields: [replyId], references: [id], onDelete: Cascade)
+  replyId Int?
   createdAt DateTime @default(now())
 }

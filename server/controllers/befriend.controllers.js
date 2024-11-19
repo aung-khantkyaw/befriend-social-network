@@ -3,7 +3,7 @@ import { clients } from "../routers/ws.js";
 
 const prisma = new PrismaClient();
 
-export const post = async (req, res) => {
+export const getPosts = async (req, res) => {
   try {
     const data = await prisma.post.findMany({
       include: {
@@ -20,6 +20,63 @@ export const post = async (req, res) => {
     res.status(200).json(data);
   } catch (e) {
     res.status(500).json({ error: e });
+  }
+};
+
+export const getFriendsPosts = async (req, res) => {
+  // Convert userId to a number if it's passed as a string
+  const userId = parseInt(req.params.userId, 10);
+
+  if (isNaN(userId)) {
+    return res.status(400).json({ error: "Invalid user ID" });
+  }
+
+  console.log("User  ID:", userId);
+
+  try {
+    // Step 1: Fetch friendships
+    const friendships = await prisma.friendship.findMany({
+      where: {
+        OR: [{ userId: userId }, { friendId: userId }],
+      },
+      select: {
+        friendId: true,
+        userId: true,
+      },
+    });
+
+    // Step 2: Extract friend IDs
+    const friendIds = friendships.map((friendship) => {
+      return friendship.userId === userId
+        ? friendship.friendId
+        : friendship.userId;
+    });
+
+    console.log("Friend IDs:", friendIds);
+
+    // Step 3: Fetch posts from friends
+    const posts = await prisma.post.findMany({
+      where: {
+        userId: {
+          in: friendIds,
+        },
+      },
+      include: {
+        user: true,
+        medias: true,
+        likes: true,
+        comments: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    // Step 4: Send response
+    res.status(200).json(posts);
+  } catch (error) {
+    console.error("Error fetching friends' posts:", error); // Log the error for debugging
+    res.status(500).json({ error: error.message }); // Send a more user-friendly error message
   }
 };
 
@@ -58,6 +115,25 @@ export const createPost = async (req, res) => {
     console.error("Error creating post:", error);
     res.status(500).json({ error: "Failed to create post." });
   }
+};
+
+export const deletePost = async (req, res) => {
+  const { id } = req.params;
+
+  const post = await prisma.post.findUnique({
+    where: { id: Number(id) },
+  });
+
+  clients.forEach((client) => {
+    if (client.userId == post.userId) {
+      client.ws.send(JSON.stringify({ event: "postDelete" }));
+      console.log(`WS: event sent to ${client.userId}: postDelete`);
+    }
+  });
+
+  await prisma.post.delete({
+    where: { id: Number(id) },
+  });
 };
 
 export const likePost = async (req, res) => {
@@ -106,4 +182,20 @@ export const unlikePost = async (req, res) => {
     console.error("Error unliking post:", error);
     res.status(500).json({ error: "Failed to unlike post." });
   }
+};
+
+export const getNotis = async (req, res) => {
+  const user = res.locals.user;
+  const notis = await prisma.notification.findMany({
+    where: {
+      userId: Number(user.id),
+    },
+    include: { sender: true },
+    orderBy: { id: "desc" },
+  });
+  res.json(notis);
+};
+
+export const getFriends = async (req, res) => {
+  console.log("getFriend");
 };
