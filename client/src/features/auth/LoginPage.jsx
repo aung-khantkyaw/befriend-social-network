@@ -23,6 +23,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { authService } from "@/services/authService";
 import { InputPassword } from "@/components/ui/input-password";
+import { useEffect } from "react";
 
 const formSchema = z.object({
   username_or_email: z.string().nonempty("Please enter your username or email"),
@@ -30,13 +31,9 @@ const formSchema = z.object({
 });
 
 export default function LoginPage() {
-  const { user, login, errorMessage, errorType } = authService();
-
+  const { login, errorMessage, successType, errorType } = authService();
   const navigate = useNavigate();
-
-  if (user) {
-    navigate("/");
-  }
+  const token = localStorage.getItem("token");
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -50,6 +47,14 @@ export default function LoginPage() {
     const { username_or_email, password } = data;
     await login({ username_or_email, password });
   };
+
+  // console.log(successType);
+
+  useEffect(() => {
+    if (successType === "login" || token) {
+      navigate("/");
+    }
+  }, [successType, navigate, token]);
 
   return (
     <div className="flex h-screen w-full items-center justify-center px-4">

@@ -24,7 +24,6 @@ export const authService = create((set) => ({
       });
 
       const json = await res.json();
-      // console.log("Response from verify:", json.data);
 
       set({
         user: json.data,
@@ -205,6 +204,8 @@ export const authService = create((set) => ({
 
         set({
           user: user,
+          successType: "login",
+          successMessage: json.message,
           errorType: null,
           errorMessage: null,
         });
@@ -348,6 +349,7 @@ export const authService = create((set) => ({
 
         set({
           user: null,
+          successType: "logout",
           errorType: null,
           errorMessage: null,
         });

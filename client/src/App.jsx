@@ -16,7 +16,8 @@ import FriendList from "./features/befriend/FriendList";
 
 function App() {
   const { user, isLoading, isCheckingAuth, loadAuthState } = authService();
-  const { getFriendPosts, getPosts } = beFriendService();
+  const { getFriendPosts, getPosts, getFriends, getFriendsSuggestions } =
+    beFriendService();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const token = localStorage.getItem("token");
@@ -30,6 +31,8 @@ function App() {
           await getPosts();
           if (user && user.id) {
             await getFriendPosts(user.id);
+            await getFriends(user.id);
+            await getFriendsSuggestions(user.id);
           }
         } catch (error) {
           console.error("Error fetching posts:", error);
@@ -40,7 +43,7 @@ function App() {
     };
 
     checkAuth();
-  }, [loadAuthState, getPosts, getFriendPosts, token, user]);
+  }, [loadAuthState, getPosts, getFriendPosts, getFriends, getFriendsSuggestions, token, user]);
 
   if (isLoading || isCheckingAuth) {
     return <Loading />;

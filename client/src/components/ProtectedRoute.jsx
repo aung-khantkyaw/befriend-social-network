@@ -6,7 +6,8 @@ export default function ProtectedLayout({
   isAuthenticated,
   redirectPath = "/login",
 }) {
-  if (!isAuthenticated) {
+  const token = localStorage.getItem("token");
+  if (!isAuthenticated && !token) {
     return <Navigate to={redirectPath} replace />;
   }
   return (

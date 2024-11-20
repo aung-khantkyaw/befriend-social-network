@@ -226,4 +226,31 @@ export const beFriendService = create((set) => ({
       });
     }
   },
+
+  getFriendsSuggestions: async (userId) => {
+    try {
+      const response = await fetch(
+        `${API_URL}/get-friends-suggestions/${userId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      set({
+        friendsSuggestions: data,
+        isLoading: false,
+      });
+    } catch (error) {
+      set({
+        errorType: "posts",
+        errorMessage: error.message,
+        isLoading: false,
+      });
+    }
+  },
 }));

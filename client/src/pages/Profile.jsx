@@ -51,15 +51,6 @@ export default function Profile() {
   const [user, setUser] = useState(null);
   const avatar = `${api}/${user?.profile}`;
 
-  // const actions = {
-  //   likePost: async (postId, userId) => {
-  //     /* function implementation */
-  //   },
-  //   unlikePost: async (postId, userId) => {
-  //     /* function implementation */
-  //   },
-  // };
-
   useEffect(() => {
     async function fetchProfile() {
       try {

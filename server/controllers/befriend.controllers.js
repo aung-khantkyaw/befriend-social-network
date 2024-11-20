@@ -31,10 +31,7 @@ export const getFriendsPosts = async (req, res) => {
     return res.status(400).json({ error: "Invalid user ID" });
   }
 
-  console.log("User  ID:", userId);
-
   try {
-    // Step 1: Fetch friendships
     const friendships = await prisma.friendship.findMany({
       where: {
         OR: [{ userId: userId }, { friendId: userId }],
@@ -45,16 +42,12 @@ export const getFriendsPosts = async (req, res) => {
       },
     });
 
-    // Step 2: Extract friend IDs
     const friendIds = friendships.map((friendship) => {
       return friendship.userId === userId
         ? friendship.friendId
         : friendship.userId;
     });
 
-    console.log("Friend IDs:", friendIds);
-
-    // Step 3: Fetch posts from friends
     const posts = await prisma.post.findMany({
       where: {
         userId: {
@@ -72,7 +65,6 @@ export const getFriendsPosts = async (req, res) => {
       },
     });
 
-    // Step 4: Send response
     res.status(200).json(posts);
   } catch (error) {
     console.error("Error fetching friends' posts:", error); // Log the error for debugging
@@ -197,5 +189,94 @@ export const getNotis = async (req, res) => {
 };
 
 export const getFriends = async (req, res) => {
-  console.log("getFriend");
+  const userId = parseInt(req.params.userId, 10);
+
+  if (isNaN(userId)) {
+    return res.status(400).json({ error: "Invalid user ID" });
+  }
+
+  try {
+    const friendships = await prisma.friendship.findMany({
+      where: {
+        OR: [{ userId: userId }, { friendId: userId }],
+      },
+      select: {
+        friendId: true,
+        userId: true,
+      },
+    });
+
+    const friendIds = friendships.map((friendship) => {
+      return friendship.userId === userId
+        ? friendship.friendId
+        : friendship.userId;
+    });
+
+    const friends = await prisma.user.findMany({
+      where: {
+        id: {
+          in: friendIds,
+        },
+      },
+      include: {
+        posts: {
+          include: {
+            user: true,
+            medias: true,
+            likes: true,
+            comments: true,
+          },
+        },
+      },
+    });
+
+    res.status(200).json(friends);
+  } catch (error) {
+    console.error("Error fetching friends' posts:", error); // Log the error for debugging
+    res.status(500).json({ error: error.message }); // Send a more user-friendly error message
+  }
+};
+
+export const getFriendsSuggestions = async (req, res) => {
+  const userId = parseInt(req.params.userId, 10);
+
+  if (isNaN(userId)) {
+    return res.status(400).json({ error: "Invalid user ID" });
+  }
+
+  try {
+    const friendships = await prisma.friendship.findMany({
+      where: {
+        OR: [{ userId: userId }, { friendId: userId }],
+      },
+      select: {
+        friendId: true,
+        userId: true,
+      },
+    });
+
+    const friendIds = friendships.map((friendship) => {
+      return friendship.userId === userId
+        ? friendship.friendId
+        : friendship.userId;
+    });
+
+    const users = await prisma.user.findMany({
+      where: {
+        NOT: {
+          id: {
+            in: friendIds,
+          },
+        },
+        id: {
+          not: userId,
+        },
+      },
+    });
+
+    res.status(200).json(users);
+  } catch (error) {
+    console.error("Error fetching friends' posts:", error); // Log the error for debugging
+    res.status(500).json({ error: error.message }); // Send a more user-friendly error message
+  }
 };

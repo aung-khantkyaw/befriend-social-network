@@ -8,6 +8,7 @@ import {
   getFriendsPosts,
   getNotis,
   getFriends,
+  getFriendsSuggestions,
 } from "../controllers/befriend.controllers.js";
 
 import multer from "multer";
@@ -39,7 +40,8 @@ beFriendRouter.delete("/delete-post/:id", auth, isOwner("posts"), deletePost);
 beFriendRouter.post("/like", likePost);
 beFriendRouter.post("/unlike", unlikePost);
 
-beFriendRouter.get("/get-friends/:id", getFriends);
+beFriendRouter.get("/get-friends-suggestions/:userId", getFriendsSuggestions);
+beFriendRouter.get("/get-friends/:userId", getFriends);
 
 beFriendRouter.get("/notis", auth, getNotis);
 
