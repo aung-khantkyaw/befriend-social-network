@@ -10,9 +10,14 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { authService } from "@/services/authService";
+import { beFriendService } from "@/services/beFriendService";
 
 export function AppSidebar({ ...props }) {
   const { user } = authService();
+  const { notifications } = beFriendService();
+
+  const count = notifications?.filter((n) => n.isRead === false).length;
+
   const data = {
     user: {
       name: user?.name,
@@ -66,6 +71,7 @@ export function AppSidebar({ ...props }) {
           {
             title: "Notifications",
             url: "/notifications",
+            count: (count > 0 && count) || null,
           },
         ],
       },

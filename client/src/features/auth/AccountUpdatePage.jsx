@@ -72,10 +72,8 @@ const formSchema = z.object({
   annidate: z.string().optional(),
 });
 export default function AccountUpdatePage({ user }) {
-  const { updateProfile, successType, errorType, errorMessage } = authService();
+  const { updateProfile, successType, errorType } = authService();
   const { toast } = useToast();
-
-  console.log(successType, errorType, errorMessage);
 
   const accountUpdateForm = useForm({
     resolver: zodResolver(formSchema),

@@ -160,7 +160,8 @@ model Notification{
   userId Int
   sender User @relation("Sender", fields: [senderId], references: [id], onDelete: Cascade)
   senderId Int
-  type String
+  title String
+  message String
   isRead Boolean @default(false)
   
   post Post? @relation(fields: [postId], references: [id], onDelete: Cascade)

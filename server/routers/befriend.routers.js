@@ -1,14 +1,16 @@
 import express from "express";
 import {
   getPosts,
+  getFriendsPosts,
   createPost,
+  deletePost,
   likePost,
   unlikePost,
-  deletePost,
-  getFriendsPosts,
-  getNotis,
   getFriends,
+  getFriendRequests,
+  sendFriendRequest,
   getFriendsSuggestions,
+  getNotis,
 } from "../controllers/befriend.controllers.js";
 
 import multer from "multer";
@@ -35,13 +37,16 @@ beFriendRouter.get("/", (req, res) => {
 beFriendRouter.get("/get-posts", getPosts);
 beFriendRouter.get("/getFriendPosts/:userId", getFriendsPosts);
 beFriendRouter.post("/create-post", upload.array("mediaFiles", 6), createPost);
+// beFriendRouter.put("/edit-post/:id", auth, isOwner("posts"), createPost);
 beFriendRouter.delete("/delete-post/:id", auth, isOwner("posts"), deletePost);
 
 beFriendRouter.post("/like", likePost);
 beFriendRouter.post("/unlike", unlikePost);
 
-beFriendRouter.get("/get-friends-suggestions/:userId", getFriendsSuggestions);
 beFriendRouter.get("/get-friends/:userId", getFriends);
+beFriendRouter.get("/get-friend-requests/:userId", getFriendRequests);
+beFriendRouter.post("/send-friend-request", sendFriendRequest);
+beFriendRouter.get("/get-friends-suggestions/:userId", getFriendsSuggestions);
 
 beFriendRouter.get("/notis", auth, getNotis);
 

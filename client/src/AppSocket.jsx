@@ -1,11 +1,13 @@
 import { useEffect } from "react";
 import useWebSocket, { ReadyState } from "react-use-websocket";
-import { authService } from "./services/authService";
+import { beFriendService } from "./services/beFriendService";
+
 export default function AppSocket() {
-  const { isAuthenticated } = authService();
+  const isAuthenticated = localStorage.getItem("token");
   const { sendJsonMessage, lastJsonMessage, readyState } = useWebSocket(
     import.meta.env.VITE_WS_URL
   );
+  const { getNotis } = beFriendService();
 
   useEffect(() => {
     if (isAuthenticated && readyState === ReadyState.OPEN) {
@@ -14,14 +16,18 @@ export default function AppSocket() {
       });
       console.log("WS: connection ready & token sent");
     }
-  }, [readyState]);
+  }, [readyState, isAuthenticated, sendJsonMessage]);
 
   useEffect(() => {
     console.log("WS: new message received");
-    if (lastJsonMessage && lastJsonMessage.event) {
+    if (lastJsonMessage?.event) {
+      async function handleEvent() {
+        await getNotis();
+      }
+      handleEvent();
       console.log("WS: event received", lastJsonMessage.event);
     }
-  }, [lastJsonMessage]);
-  
+  }, [lastJsonMessage, getNotis]);
+
   return <></>;
 }

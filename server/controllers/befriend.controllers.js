@@ -109,6 +109,10 @@ export const createPost = async (req, res) => {
   }
 };
 
+export const editPost = async (req, res) => {
+  console.log("Edit post");
+};
+
 export const deletePost = async (req, res) => {
   const { id } = req.params;
 
@@ -145,6 +149,18 @@ export const likePost = async (req, res) => {
       },
     });
 
+    const post = await prisma.post.findUnique({
+      where: { id: parseInt(postId) },
+    });
+
+    await addNotis({
+      userId: post.userId,
+      senderId: userId,
+      title: "Like",
+      message: "",
+      postId: postId,
+    });
+
     res.status(201).json({ message: "Post liked successfully.", like });
   } catch (error) {
     console.error("Error liking post:", error);
@@ -176,18 +192,6 @@ export const unlikePost = async (req, res) => {
   }
 };
 
-export const getNotis = async (req, res) => {
-  const user = res.locals.user;
-  const notis = await prisma.notification.findMany({
-    where: {
-      userId: Number(user.id),
-    },
-    include: { sender: true },
-    orderBy: { id: "desc" },
-  });
-  res.json(notis);
-};
-
 export const getFriends = async (req, res) => {
   const userId = parseInt(req.params.userId, 10);
 
@@ -199,6 +203,7 @@ export const getFriends = async (req, res) => {
     const friendships = await prisma.friendship.findMany({
       where: {
         OR: [{ userId: userId }, { friendId: userId }],
+        AND: { status: "accepted" },
       },
       select: {
         friendId: true,
@@ -234,6 +239,50 @@ export const getFriends = async (req, res) => {
   } catch (error) {
     console.error("Error fetching friends' posts:", error); // Log the error for debugging
     res.status(500).json({ error: error.message }); // Send a more user-friendly error message
+  }
+};
+
+export const getFriendRequests = async (req, res) => {
+  console.log("Getting friend requests");
+};
+
+export const sendFriendRequest = async (req, res) => {
+  const { userId, friendId } = req.body;
+  console.log("Sending friend request");
+  console.log(userId, friendId);
+  try {
+    if (!userId || !friendId) {
+      return res
+        .status(400)
+        .json({ error: "User ID and Friend ID are required." });
+    }
+
+    const friendship = await prisma.friendship.create({
+      data: {
+        userId: parseInt(userId),
+        friendId: parseInt(friendId),
+        status: "pending",
+      },
+    });
+
+    const username = await prisma.user.findUnique({
+      where: { id: parseInt(userId) },
+      select: {
+        username: true,
+      },
+    });
+
+    await addNotis({
+      userId: friendId,
+      senderId: userId,
+      title: "Friend Request",
+      message: `${username.username} sent you a friend request.`,
+    });
+
+    res.status(201).json({ message: "Friend request sent.", friendship });
+  } catch (error) {
+    console.error("Error sending friend request:", error);
+    res.status(500).json({ error: "Failed to send friend request." });
   }
 };
 
@@ -278,5 +327,67 @@ export const getFriendsSuggestions = async (req, res) => {
   } catch (error) {
     console.error("Error fetching friends' posts:", error); // Log the error for debugging
     res.status(500).json({ error: error.message }); // Send a more user-friendly error message
+  }
+};
+
+export const getNotis = async (req, res) => {
+  const user = res.locals.user;
+  const notis = await prisma.notification.findMany({
+    where: {
+      userId: Number(user.id),
+    },
+    include: { sender: true },
+    orderBy: { id: "desc" },
+  });
+
+  res.json(notis);
+};
+
+export const addNotis = async (notificationData) => {
+  const {
+    userId,
+    senderId,
+    title,
+    message,
+    postId,
+    commentId,
+    replyId,
+    shareId,
+  } = notificationData;
+
+  try {
+    const noti = await prisma.notification.create({
+      data: {
+        userId: Number(userId),
+        senderId: Number(senderId),
+        title: title,
+        message: message,
+        postId: Number(postId) || null,
+        commentId: Number(commentId) || null,
+        replyId: Number(replyId) || null,
+        shareId: Number(shareId) || null,
+      },
+    });
+
+    // const post = await prisma.post.findUnique({
+    //   where: {
+    //     id: parseInt(postId),
+    //   },
+    // });
+
+    clients.forEach((client) => {
+      console.log(client.userId, userId);
+      if (client.userId == userId) {
+        client.ws.send(JSON.stringify({ event: "notiAdd" }));
+        console.log(
+          `WS: event sent to ${client.userId} from ${senderId}: notiAdd`
+        );
+      }
+    });
+
+    return noti; // Return the notification
+  } catch (error) {
+    console.error("Error adding notification:", error);
+    throw new Error("Failed to add notification."); // Throw an error to be caught in likePost
   }
 };

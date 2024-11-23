@@ -31,6 +31,10 @@ export const authService = create((set) => ({
         isCheckingAuth: false,
       });
     } catch (error) {
+      set({
+        isLoading: false,
+        isCheckingAuth: false,
+      });
       console.error("Error in loadAuthState Function: ", error);
     }
   },
@@ -344,7 +348,6 @@ export const authService = create((set) => ({
       console.log("JSON parsed response:", json);
 
       if (json.success === "true") {
-        localStorage.removeItem("user");
         localStorage.removeItem("token");
 
         set({

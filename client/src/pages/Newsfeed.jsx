@@ -12,7 +12,9 @@ export default function Newsfeed() {
   const { isLoading, getPosts, getFriendPosts, allPosts, friendPosts } =
     beFriendService();
 
-  isLoading && <Loading />;
+  if (isLoading) {
+    return <Loading />;
+  }
 
   function handleGetPosts() {
     getFriendPosts(user?.id);

@@ -227,6 +227,45 @@ export const beFriendService = create((set) => ({
     }
   },
 
+  getFriendRequests: async (userId) => {
+    console.log("Getting friend requests for user:", userId);
+  },
+
+  sendFriendRequest: async (userId, friendId) => {
+    try {
+      const response = await fetch(`${API_URL}/send-friend-request`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId, friendId }),
+      });
+
+      const data = await response.json();
+
+      if (response.status !== 201) {
+        set({
+          errorType: "sendFriendRequest",
+          errorMessage: data.error,
+          isLoading: false,
+        });
+        throw new Error(data.error);
+      }
+
+      set({
+        successType: "sendFriendRequest",
+        successMessage: data.message,
+        isLoading: false,
+      });
+    } catch (error) {
+      set({
+        errorType: "sendFriendRequest",
+        errorMessage: error.message,
+        isLoading: false,
+      });
+    }
+  },
+
   getFriendsSuggestions: async (userId) => {
     try {
       const response = await fetch(
@@ -243,6 +282,31 @@ export const beFriendService = create((set) => ({
 
       set({
         friendsSuggestions: data,
+        isLoading: false,
+      });
+    } catch (error) {
+      set({
+        errorType: "posts",
+        errorMessage: error.message,
+        isLoading: false,
+      });
+    }
+  },
+
+  getNotis: async () => {
+    try {
+      const response = await fetch(`${API_URL}/notis`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      const data = await response.json();
+
+      set({
+        notifications: data,
         isLoading: false,
       });
     } catch (error) {
