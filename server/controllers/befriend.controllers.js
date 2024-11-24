@@ -322,6 +322,7 @@ export const sendFriendRequest = async (req, res) => {
       senderId: userId,
       title: "Friend Request Received",
       message: `${username.username} sent you a friend request.`,
+      routeTo: `/${username.username}`,
     });
 
     res.status(201).json({ message: "Friend request sent.", friendship });
@@ -354,6 +355,7 @@ export const acceptFriendRequest = async (req, res) => {
       senderId: friendship.friendId,
       title: "Friend Request Accepted",
       message: `${friend.username} accepted your friend request.`,
+      routeTo: `/${friend.username}`,
     });
 
     res.status(200).json({ message: "Friend request accepted.", friendship });
@@ -446,6 +448,7 @@ export const addNotis = async (notificationData) => {
   const {
     userId,
     senderId,
+    routeTo,
     title,
     message,
     postId,
@@ -459,6 +462,7 @@ export const addNotis = async (notificationData) => {
       data: {
         userId: Number(userId),
         senderId: Number(senderId),
+        routeTo: routeTo,
         title: title,
         message: message,
         postId: Number(postId) || null,
@@ -482,5 +486,31 @@ export const addNotis = async (notificationData) => {
   } catch (error) {
     console.error("Error adding notification:", error);
     throw new Error("Failed to add notification.");
+  }
+};
+
+export const markAsRead = async (req, res) => {
+  const { notiId } = req.params;
+  const user = res.locals.user;
+  console.log("Marking notification as read:", notiId);
+  try {
+    await prisma.notification.update({
+      where: { id: Number(notiId) },
+      data: {
+        isRead: true,
+      },
+    });
+
+    clients.forEach((client) => {
+      if (client.userId == user.id) {
+        client.ws.send(JSON.stringify({ event: "notiRead" }));
+        console.log(`WS: event sent to ${client.userId}: notiRead`);
+      }
+    });
+
+    res.status(200).json({ message: "Notification marked as read." });
+  } catch (error) {
+    console.error("Error marking notification as read:", error);
+    res.status(500).json({ error: "Failed to mark notification as read." });
   }
 };

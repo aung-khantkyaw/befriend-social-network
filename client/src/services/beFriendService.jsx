@@ -408,4 +408,41 @@ export const beFriendService = create((set) => ({
       });
     }
   },
+
+  markAsRead: async (notiId) => {
+    console.log("Marking as read:", notiId);
+
+    try {
+      const resposne = await fetch(`${API_URL}/mark-as-read/${notiId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      const data = await resposne.json();
+
+      if (resposne.status !== 200) {
+        set({
+          errorType: "markAsRead",
+          errorMessage: data.error,
+          isLoading: false,
+        });
+        throw new Error(data.error);
+      }
+
+      set({
+        successType: "markAsRead",
+        successMessage: data.message,
+        isLoading: false,
+      });
+    } catch (error) {
+      set({
+        errorType: "markAsRead",
+        errorMessage: error.message,
+        isLoading: false,
+      });
+    }
+  },
 }));

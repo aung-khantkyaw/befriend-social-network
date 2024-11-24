@@ -14,6 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { authService } from "@/services/authService";
 import { beFriendService } from "@/services/beFriendService";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function FriendList() {
@@ -28,10 +29,42 @@ export default function FriendList() {
   } = beFriendService();
   const navigate = useNavigate();
 
-  async function unfriendHandle(friendshipId) {
-    await unfriend(friendshipId);
-    friends 
-  }
+  const [filteredFriends, setFilteredFriends] = useState(friends);
+
+  const [filteredFriendRequests, setFilteredFriendRequests] =
+    useState(friendRequests);
+
+  const [filteredSuggestions, setFilteredSuggestions] =
+    useState(friendsSuggestions);
+
+  useEffect(() => {
+    setFilteredSuggestions(friendsSuggestions);
+    setFilteredFriends(friends);
+    setFilteredFriendRequests(friendRequests);
+  }, [friendsSuggestions, friends, friendRequests]);
+
+  const handleUnfriend = (friendshipId) => {
+    unfriend(friendshipId);
+    setFilteredFriends((prevFriends) =>
+      prevFriends.filter((friend) => friend.friendshipId !== friendshipId)
+    );
+  };
+
+  const handleAcceptFriendRequest = (friendshipId) => {
+    acceptFriendRequest(friendshipId);
+    setFilteredFriendRequests((prevFriendRequests) =>
+      prevFriendRequests.filter(
+        (friendRequest) => friendRequest.id !== friendshipId
+      )
+    );
+  };
+
+  const handleAddFriend = (friendId) => {
+    sendFriendRequest(user.id, friendId);
+    setFilteredSuggestions((prevSuggestions) =>
+      prevSuggestions.filter((suggestion) => suggestion.id !== friendId)
+    );
+  };
 
   return (
     <div>
@@ -48,7 +81,7 @@ export default function FriendList() {
           <TabsContent value="request">
             {/* <ScrollArea className="h-[53rem] p-5 border rounded-md"> */}
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
-              {friendRequests?.map((friendRequest) => (
+              {filteredFriendRequests?.map((friendRequest) => (
                 <Card className="w-72 mx-auto mb-2" key={friendRequest.user.id}>
                   <CardHeader className="relative">
                     <div className="flex-row items-center">
@@ -82,7 +115,7 @@ export default function FriendList() {
                         </Button>
                         <Button
                           onClick={() => {
-                            acceptFriendRequest(friendRequest.id);
+                            handleAcceptFriendRequest(friendRequest.id);
                           }}
                         >
                           Accept Friend
@@ -98,7 +131,7 @@ export default function FriendList() {
           <TabsContent value="friend">
             {/* <ScrollArea className="h-[53rem] p-5 border rounded-md"> */}
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
-              {friends?.map((friend) => (
+              {filteredFriends?.map((friend) => (
                 <Card className="w-72 mx-auto mb-2" key={friend.id}>
                   <CardHeader className="relative">
                     <div className="flex-row items-center">
@@ -129,7 +162,7 @@ export default function FriendList() {
                         <Button
                           variant="destructive"
                           onClick={() => {
-                            unfriendHandle(friend.friendshipId);
+                            handleUnfriend(friend.friendshipId);
                           }}
                         >
                           Unfriend
@@ -145,7 +178,7 @@ export default function FriendList() {
           <TabsContent value="suggestion">
             {/* <ScrollArea className="h-[53rem] p-5 border rounded-md"> */}
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
-              {friendsSuggestions?.map((friendSuggestions) => (
+              {filteredSuggestions?.map((friendSuggestions) => (
                 <Card className="w-72 mx-auto mb-2" key={friendSuggestions.id}>
                   <CardHeader className="relative">
                     <div className="flex-row items-center">
@@ -178,9 +211,7 @@ export default function FriendList() {
                           View Porfile
                         </Button>
                         <Button
-                          onClick={() =>
-                            sendFriendRequest(user.id, friendSuggestions.id)
-                          }
+                          onClick={() => handleAddFriend(friendSuggestions.id)}
                         >
                           Add Friend
                         </Button>

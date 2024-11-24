@@ -162,6 +162,7 @@ model Notification{
   senderId Int
   title String
   message String
+  routeTo String @default("/")
   isRead Boolean @default(false)
   
   post Post? @relation(fields: [postId], references: [id], onDelete: Cascade)

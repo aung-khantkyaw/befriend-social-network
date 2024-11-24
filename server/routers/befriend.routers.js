@@ -13,6 +13,7 @@ import {
   getFriendsSuggestions,
   getNotis,
   unfriend,
+  markAsRead,
 } from "../controllers/befriend.controllers.js";
 
 import multer from "multer";
@@ -53,5 +54,6 @@ beFriendRouter.delete("/unfriend/:friendshipId", unfriend);
 beFriendRouter.get("/get-friends-suggestions/:userId", getFriendsSuggestions);
 
 beFriendRouter.get("/notis", auth, getNotis);
+beFriendRouter.put("/mark-as-read/:notiId", auth, markAsRead);
 
 export default beFriendRouter;

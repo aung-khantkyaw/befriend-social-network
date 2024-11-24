@@ -123,13 +123,21 @@ CREATE TABLE "Notification" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "userId" INTEGER NOT NULL,
     "senderId" INTEGER NOT NULL,
-    "type" TEXT NOT NULL,
-    "targetId" INTEGER,
-    "targetType" TEXT,
+    "title" TEXT NOT NULL,
+    "message" TEXT NOT NULL,
+    "routeTo" TEXT NOT NULL DEFAULT '/',
     "isRead" BOOLEAN NOT NULL DEFAULT false,
+    "postId" INTEGER,
+    "shareId" INTEGER,
+    "commentId" INTEGER,
+    "replyId" INTEGER,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "Notification_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT "Notification_senderId_fkey" FOREIGN KEY ("senderId") REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT "Notification_senderId_fkey" FOREIGN KEY ("senderId") REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "Notification_postId_fkey" FOREIGN KEY ("postId") REFERENCES "Post" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "Notification_shareId_fkey" FOREIGN KEY ("shareId") REFERENCES "Share" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "Notification_commentId_fkey" FOREIGN KEY ("commentId") REFERENCES "Comment" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "Notification_replyId_fkey" FOREIGN KEY ("replyId") REFERENCES "ReplyComment" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- CreateIndex
