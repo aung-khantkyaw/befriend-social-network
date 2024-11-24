@@ -10,28 +10,21 @@ export default function Notification() {
   return (
     <>
       <Header page="Notifications" />
-      <div className="container h-screen">
-        <div className="row">
-          <div className="col-12">
-            <h1>Notifications</h1>
-            <div className="list-group">
-              {notifications.map((noti) => (
-                <div
-                  key={noti.id}
-                  className="list-group-item list-group-item-action"
-                >
-                  <div className="d-flex w-100 justify-content-between">
-                    <h5 className="mb-1">
-                      {noti.sender.name} {noti.type} your post
-                    </h5>
-                    <small>{diffForHumans(noti.createdAt)}</small>
-                  </div>
-                  <p className="mb-1">{noti.content}</p>
-                  <small>{noti.type}</small>
-                </div>
-              ))}
+      <div className="container mx-auto px-6">
+        <h1>Notifications</h1>
+        <div className="list-group">
+          {notifications?.map((noti) => (
+            <div
+              key={noti.id}
+              className="list-group-item list-group-item-action"
+            >
+              <div className="d-flex w-100 justify-content-between">
+                <h5 className="mb-1">{noti.title}</h5>
+                <small>{diffForHumans(noti.createdAt)}</small>
+              </div>
+              <p className="mb-1">{noti.message}</p>
             </div>
-          </div>
+          ))}
         </div>
       </div>
     </>

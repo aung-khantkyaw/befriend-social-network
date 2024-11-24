@@ -228,12 +228,32 @@ export const beFriendService = create((set) => ({
   },
 
   getFriendRequests: async (userId) => {
-    console.log("Getting friend requests for user:", userId);
+    try {
+      const response = await fetch(`${API_URL}/get-friend-requests/${userId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+
+      set({
+        friendRequests: data,
+        isLoading: false,
+      });
+    } catch (error) {
+      set({
+        errorType: "posts",
+        errorMessage: error.message,
+        isLoading: false,
+      });
+    }
   },
 
   sendFriendRequest: async (userId, friendId) => {
     try {
-      const response = await fetch(`${API_URL}/send-friend-request`, {
+      const response = await fetch(`${API_URL}/send-friend-request/${userId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -266,6 +286,78 @@ export const beFriendService = create((set) => ({
     }
   },
 
+  acceptFriendRequest: async (friendshipId) => {
+    console.log("Accepting friend request:", friendshipId);
+    try {
+      const response = await fetch(
+        `${API_URL}/accept-friend-request/${friendshipId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.status !== 200) {
+        set({
+          errorType: "acceptFriendRequest",
+          errorMessage: data.error,
+          isLoading: false,
+        });
+        throw new Error(data.error);
+      }
+
+      set({
+        successType: "acceptFriendRequest",
+        successMessage: data.message,
+        isLoading: false,
+      });
+    } catch (error) {
+      set({
+        errorType: "acceptFriendRequest",
+        errorMessage: error.message,
+        isLoading: false,
+      });
+    }
+  },
+
+  unfriend: async (friendshipId) => {
+    try {
+      const response = await fetch(`${API_URL}/unfriend/${friendshipId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.status !== 200) {
+        set({
+          errorType: "unfriend",
+          errorMessage: data.error,
+          isLoading: false,
+        });
+        throw new Error(data.error);
+      }
+
+      set({
+        successType: "unfriend",
+        successMessage: data.message,
+        isLoading: false,
+      });
+    } catch (error) {
+      set({
+        errorType: "unfriend",
+        errorMessage: error.message,
+        isLoading: false,
+      });
+    }
+  },
+
   getFriendsSuggestions: async (userId) => {
     try {
       const response = await fetch(
@@ -279,7 +371,6 @@ export const beFriendService = create((set) => ({
       );
 
       const data = await response.json();
-
       set({
         friendsSuggestions: data,
         isLoading: false,

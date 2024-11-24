@@ -11,7 +11,7 @@ export default function AuthLayout({ children }) {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>{children || <Newsfeed />}</SidebarInset>
-      <SuggestSidebar />
+      {/* <SuggestSidebar /> */}
       <Toaster />
     </SidebarProvider>
   );

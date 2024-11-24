@@ -206,6 +206,7 @@ export const getFriends = async (req, res) => {
         AND: { status: "accepted" },
       },
       select: {
+        id: true,
         friendId: true,
         userId: true,
       },
@@ -223,19 +224,32 @@ export const getFriends = async (req, res) => {
           in: friendIds,
         },
       },
-      include: {
-        posts: {
-          include: {
-            user: true,
-            medias: true,
-            likes: true,
-            comments: true,
-          },
-        },
-      },
     });
 
-    res.status(200).json(friends);
+    // Construct the response with friend data and friendship ID
+    const friendsWithFriendshipId = friendships.map((friendship) => {
+      const friend = friends.find(
+        (u) =>
+          u.id ===
+          (friendship.userId === userId
+            ? friendship.friendId
+            : friendship.userId)
+      );
+      return {
+        friendshipId: friendship.id, // Include the friendship ID
+        friendId:
+          friendship.userId === userId
+            ? friendship.friendId
+            : friendship.userId,
+        ...friend, // Spread the user details (excluding password)
+      };
+    });
+
+    const sanitizedFriends = friendsWithFriendshipId.map(
+      ({ password, ...userWithoutPassword }) => userWithoutPassword
+    );
+
+    res.status(200).json(sanitizedFriends);
   } catch (error) {
     console.error("Error fetching friends' posts:", error); // Log the error for debugging
     res.status(500).json({ error: error.message }); // Send a more user-friendly error message
@@ -243,7 +257,38 @@ export const getFriends = async (req, res) => {
 };
 
 export const getFriendRequests = async (req, res) => {
-  console.log("Getting friend requests");
+  const userId = parseInt(req.params.userId, 10);
+
+  if (isNaN(userId)) {
+    return res.status(400).json({ error: "Invalid user ID" });
+  }
+
+  try {
+    const friendRequests = await prisma.friendship.findMany({
+      where: {
+        friendId: userId,
+        status: "pending",
+      },
+      include: {
+        user: true,
+      },
+    });
+
+    const sanitizedFriendRequests = friendRequests.map(
+      ({ user, ...friendRequest }) => {
+        const { password, ...userWithoutPassword } = user;
+        return {
+          ...friendRequest,
+          user: userWithoutPassword,
+        };
+      }
+    );
+
+    res.status(200).json(sanitizedFriendRequests);
+  } catch (error) {
+    console.error("Error fetching friend requests:", error);
+    res.status(500).json({ error: "Failed to fetch friend requests." });
+  }
 };
 
 export const sendFriendRequest = async (req, res) => {
@@ -275,7 +320,7 @@ export const sendFriendRequest = async (req, res) => {
     await addNotis({
       userId: friendId,
       senderId: userId,
-      title: "Friend Request",
+      title: "Friend Request Received",
       message: `${username.username} sent you a friend request.`,
     });
 
@@ -283,6 +328,56 @@ export const sendFriendRequest = async (req, res) => {
   } catch (error) {
     console.error("Error sending friend request:", error);
     res.status(500).json({ error: "Failed to send friend request." });
+  }
+};
+
+export const acceptFriendRequest = async (req, res) => {
+  const friendshipId = parseInt(req.params.friendshipId, 10);
+  console.log("Accepting friend request:", friendshipId);
+
+  try {
+    const friendship = await prisma.friendship.update({
+      where: {
+        id: friendshipId,
+      },
+      data: {
+        status: "accepted",
+      },
+    });
+
+    const friend = await prisma.user.findUnique({
+      where: { id: friendship.friendId },
+    });
+
+    await addNotis({
+      userId: friendship.userId,
+      senderId: friendship.friendId,
+      title: "Friend Request Accepted",
+      message: `${friend.username} accepted your friend request.`,
+    });
+
+    res.status(200).json({ message: "Friend request accepted.", friendship });
+  } catch (error) {
+    console.error("Error accepting friend request:", error);
+    res.status(500).json({ error: "Failed to accept friend request." });
+  }
+};
+
+export const unfriend = async (req, res) => {
+  const friendshipId = parseInt(req.params.friendshipId, 10);
+  console.log("Unfriending:", friendshipId);
+
+  try {
+    await prisma.friendship.deleteMany({
+      where: {
+        id: friendshipId,
+      },
+    });
+
+    res.status(200).json({ message: "unfriend success" });
+  } catch (error) {
+    console.error("Error unfriend:", error);
+    res.status(500).json({ error: "Failed to unfriend." });
   }
 };
 
@@ -310,7 +405,7 @@ export const getFriendsSuggestions = async (req, res) => {
         : friendship.userId;
     });
 
-    const users = await prisma.user.findMany({
+    const friendsSuggestions = await prisma.user.findMany({
       where: {
         NOT: {
           id: {
@@ -323,7 +418,11 @@ export const getFriendsSuggestions = async (req, res) => {
       },
     });
 
-    res.status(200).json(users);
+    const sanitizedFriendsSuggestions = friendsSuggestions.map(
+      ({ password, ...userWithoutPassword }) => userWithoutPassword
+    );
+
+    res.status(200).json(sanitizedFriendsSuggestions);
   } catch (error) {
     console.error("Error fetching friends' posts:", error); // Log the error for debugging
     res.status(500).json({ error: error.message }); // Send a more user-friendly error message
@@ -369,12 +468,6 @@ export const addNotis = async (notificationData) => {
       },
     });
 
-    // const post = await prisma.post.findUnique({
-    //   where: {
-    //     id: parseInt(postId),
-    //   },
-    // });
-
     clients.forEach((client) => {
       console.log(client.userId, userId);
       if (client.userId == userId) {
@@ -385,9 +478,9 @@ export const addNotis = async (notificationData) => {
       }
     });
 
-    return noti; // Return the notification
+    return noti;
   } catch (error) {
     console.error("Error adding notification:", error);
-    throw new Error("Failed to add notification."); // Throw an error to be caught in likePost
+    throw new Error("Failed to add notification.");
   }
 };

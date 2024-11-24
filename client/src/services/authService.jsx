@@ -383,7 +383,6 @@ export const authService = create((set) => ({
       console.log("JSON parsed response:", json);
 
       if (json.success === "true") {
-        localStorage.removeItem("user");
         localStorage.removeItem("token");
 
         set({

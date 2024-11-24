@@ -5,7 +5,7 @@ export default function SuggestSidebar() {
   return (
     <Sidebar
       collapsible="none"
-      className="sticky hidden lg:flex top-0 h-svh border-l"
+      className="sticky hidden xl:flex top-0 h-svh border-l max-w-[10rem]"
     >
       <SidebarContent>
         <div>

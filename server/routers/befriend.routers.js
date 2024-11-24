@@ -9,8 +9,10 @@ import {
   getFriends,
   getFriendRequests,
   sendFriendRequest,
+  acceptFriendRequest,
   getFriendsSuggestions,
   getNotis,
+  unfriend,
 } from "../controllers/befriend.controllers.js";
 
 import multer from "multer";
@@ -45,7 +47,9 @@ beFriendRouter.post("/unlike", unlikePost);
 
 beFriendRouter.get("/get-friends/:userId", getFriends);
 beFriendRouter.get("/get-friend-requests/:userId", getFriendRequests);
-beFriendRouter.post("/send-friend-request", sendFriendRequest);
+beFriendRouter.post("/send-friend-request/:userId", sendFriendRequest);
+beFriendRouter.put("/accept-friend-request/:friendshipId", acceptFriendRequest);
+beFriendRouter.delete("/unfriend/:friendshipId", unfriend);
 beFriendRouter.get("/get-friends-suggestions/:userId", getFriendsSuggestions);
 
 beFriendRouter.get("/notis", auth, getNotis);

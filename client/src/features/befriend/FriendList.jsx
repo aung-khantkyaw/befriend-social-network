@@ -9,7 +9,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
+// import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { authService } from "@/services/authService";
 import { beFriendService } from "@/services/beFriendService";
@@ -17,8 +18,20 @@ import { useNavigate } from "react-router-dom";
 
 export default function FriendList() {
   const { user } = authService();
-  const { friends, friendsSuggestions, friendRequests, sendFriendRequest } = beFriendService();
+  const {
+    friends,
+    friendsSuggestions,
+    friendRequests,
+    sendFriendRequest,
+    acceptFriendRequest,
+    unfriend,
+  } = beFriendService();
   const navigate = useNavigate();
+
+  async function unfriendHandle(friendshipId) {
+    await unfriend(friendshipId);
+    friends 
+  }
 
   return (
     <div>
@@ -33,50 +46,63 @@ export default function FriendList() {
             </TabsList>
           </div>
           <TabsContent value="request">
-            <ScrollArea className="h-[53rem] p-5 border rounded-md md:h-40">
-              {/* {friendRequests?.map((friendRequest) => (
-                <Card
-                  className="max-w-2xl mx-auto mb-2"
-                  key={friendRequest.id}
-                >
+            {/* <ScrollArea className="h-[53rem] p-5 border rounded-md"> */}
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+              {friendRequests?.map((friendRequest) => (
+                <Card className="w-72 mx-auto mb-2" key={friendRequest.user.id}>
                   <CardHeader className="relative">
-                    <div className="flex justify-between items-center">
-                      <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                    <div className="flex-row items-center">
+                      <div className="flex items-center space-x-4">
                         <Avatar className="w-16 h-16">
                           <AvatarImage
-                            src={`${api}/${friendRequest.profile}`}
-                            alt={friendSuggestions.name}
+                            src={`${api}/${friendRequest.user.profile}`}
+                            alt={friendRequest.user.name}
                           />
                           <AvatarFallback className="text-4xl font-bold">
-                            {friendRequest?.name.charAt(0)}
+                            {friendRequest.user.name.charAt(0)}
                           </AvatarFallback>
                         </Avatar>
                         <div className="text-center sm:text-left">
                           <CardTitle className="text-xl">
-                            {friendRequest.name}
+                            {friendRequest.user.name}
                           </CardTitle>
                           <CardDescription>
-                            @{friendRequest.username}
+                            @{friendRequest.user.username}
                           </CardDescription>
                         </div>
                       </div>
-                      <div className="space-x-4">
-                        <Button>View Porfile</Button>
-                        <Button>Accept Friend</Button>
+                      <Separator />
+                      <div className="flex items-center justify-between gap-2">
+                        <Button
+                          onClick={() =>
+                            navigate(`/${friendRequest.user.username}`)
+                          }
+                        >
+                          View Porfile
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            acceptFriendRequest(friendRequest.id);
+                          }}
+                        >
+                          Accept Friend
+                        </Button>
                       </div>
                     </div>
                   </CardHeader>
                 </Card>
-              ))} */}
-            </ScrollArea>
+              ))}
+            </div>
+            {/* </ScrollArea> */}
           </TabsContent>
           <TabsContent value="friend">
-            <ScrollArea className="h-[53rem] p-5 border rounded-md">
+            {/* <ScrollArea className="h-[53rem] p-5 border rounded-md"> */}
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
               {friends?.map((friend) => (
-                <Card className="max-w-2xl mx-auto mb-2" key={friend.id}>
+                <Card className="w-72 mx-auto mb-2" key={friend.id}>
                   <CardHeader className="relative">
-                    <div className="flex justify-between items-center">
-                      <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                    <div className="flex-row items-center">
+                      <div className="flex items-center space-x-4">
                         <Avatar className="w-16 h-16">
                           <AvatarImage
                             src={`${api}/${friend.profile}`}
@@ -93,25 +119,37 @@ export default function FriendList() {
                           <CardDescription>@{friend.username}</CardDescription>
                         </div>
                       </div>
-                      <div>
-                        <Button variant="destructive">Unfriend</Button>
+                      <Separator />
+                      <div className="flex items-center justify-between gap-2">
+                        <Button
+                          onClick={() => navigate(`/${friend?.username}`)}
+                        >
+                          View Porfile
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          onClick={() => {
+                            unfriendHandle(friend.friendshipId);
+                          }}
+                        >
+                          Unfriend
+                        </Button>
                       </div>
                     </div>
                   </CardHeader>
                 </Card>
               ))}
-            </ScrollArea>
+            </div>
+            {/* </ScrollArea> */}
           </TabsContent>
           <TabsContent value="suggestion">
             {/* <ScrollArea className="h-[53rem] p-5 border rounded-md"> */}
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
               {friendsSuggestions?.map((friendSuggestions) => (
-                <Card
-                  className="max-w-2xl mx-auto mb-2"
-                  key={friendSuggestions.id}
-                >
+                <Card className="w-72 mx-auto mb-2" key={friendSuggestions.id}>
                   <CardHeader className="relative">
-                    <div className="flex justify-between items-center">
-                      <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                    <div className="flex-row items-center">
+                      <div className="flex items-center space-x-4">
                         <Avatar className="w-16 h-16">
                           <AvatarImage
                             src={`${api}/${friendSuggestions.profile}`}
@@ -130,7 +168,8 @@ export default function FriendList() {
                           </CardDescription>
                         </div>
                       </div>
-                      <div className="space-x-4">
+                      <Separator />
+                      <div className="flex items-center justify-between gap-2">
                         <Button
                           onClick={() =>
                             navigate(`/${friendSuggestions?.username}`)
@@ -150,6 +189,7 @@ export default function FriendList() {
                   </CardHeader>
                 </Card>
               ))}
+            </div>
             {/* </ScrollArea> */}
           </TabsContent>
         </Tabs>

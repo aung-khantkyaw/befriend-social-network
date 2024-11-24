@@ -82,7 +82,10 @@ export function NavUser({ user }) {
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={logout}
+              onClick={() => {
+                logout();
+                navigate("/login");
+              }}
               className="bg-red-500 text-white"
             >
               <LogOut />
