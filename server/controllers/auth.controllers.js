@@ -6,6 +6,7 @@ import {
   sendResetPasswordEmail,
   sendVerificationEmail,
 } from "../utils/sendMail.js";
+import { clients } from "../routers/ws.js";
 
 const prisma = new PrismaClient();
 
@@ -401,7 +402,7 @@ export const updateProfile = async (req, res) => {
     bio,
     gender,
     dob,
-    address,
+    liveIn,
     relationship,
     partner,
     annidate,
@@ -418,7 +419,7 @@ export const updateProfile = async (req, res) => {
         bio: bio,
         gender: gender,
         dob: new Date(dob), // Convert to Date object
-        address: address,
+        liveIn: liveIn,
         relationship: relationship,
         partner: partner,
         annidate: new Date(annidate), // Convert to Date objectsuccess: false
@@ -435,6 +436,15 @@ export const updateProfile = async (req, res) => {
       success: "true",
       message: "Profile updated successfully",
       data: updatedUser,
+    });
+
+    clients.forEach((client) => {
+      console.log("Client: ", client.userId);
+      console.log("Updated User: ", updatedUser.id);
+      if (client.userId == updatedUser.id) {
+        client.ws.send(JSON.stringify({ event: "updateProfile" }));
+        console.log(`WS: event sent to ${client.userId}: updateProfile`);
+      }
     });
   } catch (error) {
     console.log("Error in updateProfile ", error);

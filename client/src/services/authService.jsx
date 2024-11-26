@@ -491,8 +491,6 @@ export const authService = create((set) => ({
           errorType: null,
           errorMessage: null,
         });
-
-        localStorage.setItem("user", JSON.stringify(user));
       }
     } catch (error) {
       console.error("Error in update profile function:", error);

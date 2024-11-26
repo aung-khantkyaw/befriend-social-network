@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { beFriendService } from "./services/beFriendService";
+import { authService } from "./services/authService";
 
 export default function AppSocket() {
   const isAuthenticated = localStorage.getItem("token");
@@ -8,6 +9,7 @@ export default function AppSocket() {
     import.meta.env.VITE_WS_URL
   );
   const { getNotis } = beFriendService();
+  const { loadAuthState } = authService();
 
   useEffect(() => {
     if (isAuthenticated && readyState === ReadyState.OPEN) {
@@ -23,6 +25,7 @@ export default function AppSocket() {
     if (lastJsonMessage?.event) {
       async function handleEvent() {
         await getNotis();
+        await loadAuthState();
       }
       handleEvent();
       console.log("WS: event received", lastJsonMessage.event);

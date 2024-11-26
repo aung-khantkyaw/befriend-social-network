@@ -118,10 +118,10 @@ export default function Profile() {
                         <p>{DateFormatter(user.dob)}</p>
                       </div>
                     )}
-                    {user.address && (
+                    {user.liveIn && (
                       <div className="grid gap-2">
-                        <Label htmlFor="address">Address</Label>
-                        <p>{user.address}</p>
+                        <Label htmlFor="address">liveIn</Label>
+                        <p>{user.liveIn}</p>
                       </div>
                     )}
                     {user.relationship && (

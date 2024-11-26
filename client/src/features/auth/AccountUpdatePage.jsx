@@ -37,6 +37,8 @@ import { useToast } from "@/hooks/use-toast";
 import PropTypes from "prop-types";
 import AvatarUploadPage from "./AvatarUploadPage";
 import { Separator } from "@/components/ui/separator";
+import { DatePicker } from "@/components/ui/date-picker";
+import { MentionsInput } from "react-mentions";
 
 const genderSelectOptions = [
   { label: "Male", value: "male" },
@@ -57,19 +59,19 @@ const formSchema = z.object({
   username: z
     .string()
     .regex(/^[a-z]+$/, "Username must be lowercase letters with no spaces"),
-  email: z.string().email("Please enter a valid email address"),
-  bio: z.string().optional(),
+  email: z.string().email("Please enter a valid email liveIn"),
+  bio: z.string().optional().nullable(), // Allow null or undefined
   gender: z.enum(["male", "female", "other", "prefer not to say"]),
-  dob: z.string(),
-  address: z.string(),
+  dob: z.string().optional().nullable(), // Allow null or undefined
+  liveIn: z.string().optional().nullable(), // Allow null or undefined
   relationship: z.enum([
     "single",
     "in a relationship",
     "married",
     "it's complicated",
   ]),
-  partner: z.string().optional(),
-  annidate: z.string().optional(),
+  partner: z.string().optional().nullable(), // Allow null or undefined
+  annidate: z.string().optional().nullable(), // Allow null or undefined
 });
 export default function AccountUpdatePage({ user }) {
   const { updateProfile, successType, errorType } = authService();
@@ -82,10 +84,10 @@ export default function AccountUpdatePage({ user }) {
       username: "",
       email: "",
       bio: "",
-      gender: "prefer not to say",
+      gender: "Prefer not to say",
       dob: "",
-      address: "",
-      relationship: "single",
+      liveIn: "",
+      relationship: "Single",
       partner: "",
       annidate: "",
     },
@@ -99,7 +101,7 @@ export default function AccountUpdatePage({ user }) {
       bio,
       gender,
       dob,
-      address,
+      liveIn,
       relationship,
       partner,
       annidate,
@@ -112,7 +114,7 @@ export default function AccountUpdatePage({ user }) {
         bio,
         gender,
         dob,
-        address,
+        liveIn,
         relationship,
         partner,
         annidate,
@@ -138,7 +140,7 @@ export default function AccountUpdatePage({ user }) {
         bio: user.bio,
         gender: user.gender || "prefer not to say",
         dob: user.dob,
-        address: user.address,
+        liveIn: user.liveIn,
         relationship: user.relationship || "single",
         partner: user.partner,
         annidate: user.annidate,
@@ -252,10 +254,10 @@ export default function AccountUpdatePage({ user }) {
 
               <FormField
                 control={accountUpdateForm.control}
-                name="address"
+                name="liveIn"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Address</FormLabel>
+                    <FormLabel>liveIn</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -326,7 +328,12 @@ export default function AccountUpdatePage({ user }) {
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>Date of Birth</FormLabel>
-                    <Popover>
+                    <DatePicker
+                      value={field.value}
+                      onChange={field.onChange}
+                      className="mb-4" // Optional styling
+                    />
+                    {/* <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
@@ -358,7 +365,7 @@ export default function AccountUpdatePage({ user }) {
                           initialFocus
                         />
                       </PopoverContent>
-                    </Popover>
+                    </Popover> */}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -424,7 +431,7 @@ AccountUpdatePage.propTypes = {
     bio: PropTypes.string,
     gender: PropTypes.string,
     dob: PropTypes.string,
-    address: PropTypes.string,
+    liveIn: PropTypes.string,
     relationship: PropTypes.string,
     partner: PropTypes.string,
     annidate: PropTypes.string,
