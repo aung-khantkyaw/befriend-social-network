@@ -14,6 +14,7 @@ import {
   getNotis,
   unfriend,
   markAsRead,
+  addComment,
 } from "../controllers/befriend.controllers.js";
 
 import multer from "multer";
@@ -45,6 +46,7 @@ beFriendRouter.delete("/delete-post/:id", auth, isOwner("posts"), deletePost);
 
 beFriendRouter.post("/like", likePost);
 beFriendRouter.post("/unlike", unlikePost);
+beFriendRouter.post("/add-comment", addComment);
 
 beFriendRouter.get("/get-friends/:userId", getFriends);
 beFriendRouter.get("/get-friend-requests/:userId", getFriendRequests);

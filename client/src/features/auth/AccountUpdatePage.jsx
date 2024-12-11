@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -26,19 +26,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Popover, PopoverContent } from "@/components/ui/popover";
-import { PopoverTrigger } from "@radix-ui/react-popover";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
 import { useToast } from "@/hooks/use-toast";
 import PropTypes from "prop-types";
 import AvatarUploadPage from "./AvatarUploadPage";
 import { Separator } from "@/components/ui/separator";
 import { DatePicker } from "@/components/ui/date-picker";
-import { MentionsInput } from "react-mentions";
+import { Mention, MentionsInput } from "react-mentions";
 
 const genderSelectOptions = [
   { label: "Male", value: "male" },
@@ -165,6 +159,31 @@ export default function AccountUpdatePage({ user }) {
       });
     }
   }, [successType, toast]);
+
+  const [friendlist, setFriendlist] = useState([]);
+
+  const friends = user?.friends;
+  const friendships = user?.friendships;
+
+  useEffect(() => {
+    let allFriends = [];
+
+    friends?.forEach((friend) => {
+      allFriends.push({ id: friend.user.username, display: friend.user.name });
+    });
+
+    friendships?.forEach((friendship) => {
+      allFriends.push({
+        id: friendship.friend.username,
+        display: friendship.friend.name,
+      });
+    });
+
+    setFriendlist(allFriends);
+  }, [friends, friendships]);
+
+  const relationship = accountUpdateForm.watch("relationship");
+  const isDisabled = relationship === "single";
 
   return (
     <Card className="max-w-4xl mx-auto mb-4">
@@ -313,9 +332,22 @@ export default function AccountUpdatePage({ user }) {
                 name="partner"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Partner</FormLabel>
+                    <FormLabel>
+                      Partner{" "}
+                      <span className="font-normal">
+                        {" "}
+                        First type "@" and then choose username{" "}
+                      </span>
+                    </FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <MentionsInput
+                        value={field.value || ""}
+                        onChange={field.onChange}
+                        className="min-h-10 border border-input rounded-md"
+                        disabled={isDisabled}
+                      >
+                        <Mention data={friendlist} />
+                      </MentionsInput>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -333,39 +365,7 @@ export default function AccountUpdatePage({ user }) {
                       onChange={field.onChange}
                       className="mb-4" // Optional styling
                     />
-                    {/* <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value
-                              ? format(new Date(field.value), "PPP")
-                              : "Pick a date"}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value ? new Date(field.value) : null}
-                          onSelect={(date) =>
-                            field.onChange(
-                              date ? date.toISOString().split("T")[0] : ""
-                            )
-                          }
-                          disabled={(date) =>
-                            date > new Date() || date < new Date("1900-01-01")
-                          }
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover> */}
+
                     <FormMessage />
                   </FormItem>
                 )}
@@ -377,39 +377,13 @@ export default function AccountUpdatePage({ user }) {
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>Anni Date</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value
-                              ? format(new Date(field.value), "PPP")
-                              : "Pick a date"}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value ? new Date(field.value) : null}
-                          onSelect={(date) =>
-                            field.onChange(
-                              date ? date.toISOString().split("T")[0] : ""
-                            )
-                          }
-                          disabled={(date) =>
-                            date > new Date() || date < new Date("1900-01-01")
-                          }
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
+                    <DatePicker
+                      value={field.value}
+                      onChange={field.onChange}
+                      className="mb-4" // Optional styling
+                      disabled={isDisabled}
+                    />
+
                     <FormMessage />
                   </FormItem>
                 )}

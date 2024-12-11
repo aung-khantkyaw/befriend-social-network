@@ -118,11 +118,11 @@ export default function LoginPage() {
             </Link>
           </div>
         </CardContent>
-        <CardFooter>
+        {/* <CardFooter>
           <Button variant="outline" className="w-full">
             Login with Google
           </Button>
-        </CardFooter>
+        </CardFooter> */}
       </Card>
     </div>
   );

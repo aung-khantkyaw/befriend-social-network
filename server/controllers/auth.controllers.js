@@ -327,7 +327,7 @@ export const getUserData = async (req, res) => {
         },
         friendships: {
           where: {
-            status: "active",
+            status: "accepted",
           },
           include: {
             friend: {

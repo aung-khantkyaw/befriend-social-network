@@ -21,9 +21,9 @@ function App() {
     getNotis,
     getFriendPosts,
     getPosts,
-    getFriends,
-    getFriendsSuggestions,
-    getFriendRequests,
+    // getFriends,
+    // getFriendsSuggestions,
+    // getFriendRequests,
   } = beFriendService();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [hasCheckedAuth, setHasCheckedAuth] = useState(false); // New state to track if auth check has been performed
@@ -38,9 +38,9 @@ function App() {
         await getPosts();
         if (user?.id) {
           await getFriendPosts(user.id);
-          await getFriends(user.id);
-          await getFriendsSuggestions(user.id);
-          await getFriendRequests(user.id);
+          // await getFriends(user.id);
+          // await getFriendsSuggestions(user.id);
+          // await getFriendRequests(user.id);
           await getNotis();
         }
       } catch (error) {
@@ -55,9 +55,9 @@ function App() {
     token,
     getPosts,
     getFriendPosts,
-    getFriends,
-    getFriendsSuggestions,
-    getFriendRequests,
+    // getFriends,
+    // getFriendsSuggestions,
+    // getFriendRequests,
     getNotis,
     user,
   ]);

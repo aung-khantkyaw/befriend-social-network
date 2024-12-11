@@ -161,6 +161,7 @@ export default function PostCreator() {
     toast({
       title: "Post created",
       description: successMessage,
+      duration: 3000,
     });
   }
 
@@ -169,6 +170,7 @@ export default function PostCreator() {
       title: "Post creation failed",
       description: errorMessage,
       variant: "destructive",
+      duration: 3000,
     });
   }
 

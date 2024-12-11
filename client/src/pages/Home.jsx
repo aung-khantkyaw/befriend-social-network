@@ -11,7 +11,7 @@ export default function Home() {
 
   return (
     <div>
-      {token ? (
+      {token && user ? (
         <>{isVerified ? <AuthLayout /> : <VerifyEmailPage />}</>
       ) : (
         <MainLayout />

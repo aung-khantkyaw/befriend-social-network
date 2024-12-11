@@ -7,19 +7,23 @@ export const getPosts = async (req, res) => {
   try {
     const data = await prisma.post.findMany({
       include: {
-        user: true,
-        medias: true,
-        comments: true,
-        likes: true,
-        shares: true,
+        user: true, // Include the user who created the post
+        medias: true, // Include media associated with the post
+        comments: {
+          include: {
+            user: true,
+          },
+        },
+        likes: true, // Include likes
+        shares: true, // Include shares
       },
-      orderBy: { id: "desc" },
-      take: 200,
+      orderBy: { id: "desc" }, // Order by post ID in descending order
+      take: 200, // Limit to 200 posts
     });
 
-    res.status(200).json(data);
+    res.status(200).json(data); // Send the data as a response
   } catch (e) {
-    res.status(500).json({ error: e });
+    res.status(500).json({ error: e }); // Handle errors
   }
 };
 
@@ -153,11 +157,18 @@ export const likePost = async (req, res) => {
       where: { id: parseInt(postId) },
     });
 
+    const username = await prisma.user.findUnique({
+      where: { id: parseInt(userId) },
+      select: {
+        username: true,
+      },
+    });
+
     await addNotis({
       userId: post.userId,
       senderId: userId,
       title: "Like",
-      message: "",
+      message: `${username.username} liked your post.`,
       postId: postId,
     });
 
@@ -189,6 +200,52 @@ export const unlikePost = async (req, res) => {
   } catch (error) {
     console.error("Error unliking post:", error);
     res.status(500).json({ error: "Failed to unlike post." });
+  }
+};
+
+export const addComment = async (req, res) => {
+  const { postId, userId, content } = req.body;
+
+  console.log("Adding comment:", postId, userId, content);
+
+  try {
+    if (!postId || !userId || !content) {
+      return res.status(400).json({
+        error: "Post ID, User ID, and Content are required.",
+      });
+    }
+
+    const comment = await prisma.comment.create({
+      data: {
+        postId: parseInt(postId),
+        userId: parseInt(userId),
+        content,
+      },
+    });
+
+    const post = await prisma.post.findUnique({
+      where: { id: parseInt(postId) },
+    });
+
+    const username = await prisma.user.findUnique({
+      where: { id: parseInt(userId) },
+      select: {
+        username: true,
+      },
+    });
+
+    await addNotis({
+      userId: post.userId,
+      senderId: userId,
+      title: "Comment",
+      message: `${username.username} commented on your post.`,
+      postId: postId,
+    });
+
+    res.status(201).json({ message: "Comment added successfully.", comment });
+  } catch (error) {
+    console.error("Error adding comment:", error);
+    res.status(500).json({ error: "Failed to add comment." });
   }
 };
 

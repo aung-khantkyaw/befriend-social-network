@@ -21,12 +21,13 @@ import {
 } from "lucide-react";
 import { authService } from "@/services/authService";
 import { formatDate, lastLogin, DateFormatter } from "@/lib/utils";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import ErrorPage from "@/components/ui/error";
 import Header from "@/components/Header";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import PostPage from "@/features/befriend/PostPage";
+import { Button } from "@/components/ui/button";
 
 const getLinkIcon = (type) => {
   switch (type) {
@@ -51,6 +52,8 @@ export default function Profile() {
   const [user, setUser] = useState(null);
   const avatar = `${api}/${user?.profile}`;
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     async function fetchProfile() {
       try {
@@ -61,7 +64,16 @@ export default function Profile() {
       }
     }
     fetchProfile();
-  }, [username]);
+  }, [username, getUserData]);
+
+  const userArray = (user?.friends || []).map((friendship) => friendship.user);
+
+  const friendArray = (user?.friendships || []).map(
+    (friendship) => friendship.friend
+  );
+
+  const friends = [...userArray, ...friendArray];
+
 
   if (!user) {
     return <ErrorPage />;
@@ -72,7 +84,7 @@ export default function Profile() {
       <Header page="Profile" />
       <ScrollArea className="h-[53rem]">
         <div className="container mx-auto p-6">
-          <Card className="max-w-4xl mx-auto">
+          <Card className="max-w-6xl mx-auto">
             <CardHeader className="relative">
               <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
                 <Avatar className="w-24 h-24">
@@ -178,11 +190,48 @@ export default function Profile() {
               </Tabs>
             </CardContent>
           </Card>
-        </div>
 
-        {user.posts?.map((post) => (
-          <PostPage key={post.id} post={post} />
-        ))}
+          <div className="max-w-6xl mx-auto my-3 grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="grid grid-cols-2">
+              {friends?.map((friend) => (
+                <Card className="w-64 mx-auto mb-2 max-h-44" key={friend.id}>
+                  <CardHeader className="relative">
+                    <div className="flex-row items-center">
+                      <div className="flex items-center space-x-4">
+                        <Avatar className="w-16 h-16">
+                          <AvatarImage
+                            src={`${api}/${friend.profile}`}
+                            alt={friend.name}
+                          />
+                          <AvatarFallback className="text-4xl font-bold">
+                            {friend?.name.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="text-center sm:text-left">
+                          <CardTitle className="text-xl">
+                            {friend.name}
+                          </CardTitle>
+                          <CardDescription>@{friend.username}</CardDescription>
+                        </div>
+                      </div>
+                      <Separator />
+                      <div className="flex items-center justify-between gap-2">
+                        <Button
+                          onClick={() => navigate(`/${friend?.username}`)}
+                        >
+                          View Porfile
+                        </Button>
+                      </div>
+                    </div>
+                  </CardHeader>
+                </Card>
+              ))}
+            </div>
+            {user.posts?.map((post) => (
+              <PostPage key={post.id} post={post} />
+            ))}
+          </div>
+        </div>
       </ScrollArea>
     </div>
   );

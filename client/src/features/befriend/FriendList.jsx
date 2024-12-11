@@ -20,6 +20,9 @@ import { useNavigate } from "react-router-dom";
 export default function FriendList() {
   const { user } = authService();
   const {
+    getFriends,
+    getFriendsSuggestions,
+    getFriendRequests,
     friends,
     friendsSuggestions,
     friendRequests,
@@ -28,6 +31,20 @@ export default function FriendList() {
     unfriend,
   } = beFriendService();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    async function fetchFriends() {
+      try {
+        await getFriends(user.id);
+        await getFriendsSuggestions(user.id);
+        await getFriendRequests(user.id);
+      } catch (error) {
+        console.error("Error fetching friends:", error);
+      }
+    }
+
+    fetchFriends();
+  }, [user.id, getFriends, getFriendsSuggestions, getFriendRequests]);
 
   const [filteredFriends, setFilteredFriends] = useState(friends);
 
@@ -70,11 +87,11 @@ export default function FriendList() {
     <div>
       <Header page="Friends" />
       <div className="container mx-auto px-6">
-        <Tabs defaultValue="request" className="max-w-4xl mx-auto">
+        <Tabs defaultValue="friend" className="max-w-4xl mx-auto">
           <div className="mb-4 flex sticky top-16 justify-between z-40 bg-white">
             <TabsList>
-              <TabsTrigger value="request">Friend Requests</TabsTrigger>
               <TabsTrigger value="friend">Friends</TabsTrigger>
+              <TabsTrigger value="request">Friend Requests</TabsTrigger>
               <TabsTrigger value="suggestion">Friend Suggestion</TabsTrigger>
             </TabsList>
           </div>

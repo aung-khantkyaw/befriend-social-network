@@ -83,12 +83,29 @@ export const beFriendService = create((set) => ({
         successMessage: data.message,
         isLoading: false,
       });
+
+      setTimeout(() => {
+        set({
+          errorType: null,
+          errorMessage: null,
+          successType: null,
+          successMessage: null,
+        });
+      }, 3000);
     } catch (error) {
       set({
         errorType: "createPost",
         errorMessage: error.message,
         isLoading: false,
       });
+      setTimeout(() => {
+        set({
+          errorType: null,
+          errorMessage: null,
+          successType: null,
+          successMessage: null,
+        });
+      }, 3000);
     }
   },
 
@@ -100,6 +117,7 @@ export const beFriendService = create((set) => ({
     const token = localStorage.getItem("token");
     console.log("Deleting post:", postId);
     console.log("Token:", token);
+
     try {
       const response = await fetch(`${API_URL}/delete-post/${postId}`, {
         method: "DELETE",
@@ -124,12 +142,30 @@ export const beFriendService = create((set) => ({
         successMessage: data.message,
         isLoading: false,
       });
+
+      setTimeout(() => {
+        set({
+          errorType: null,
+          errorMessage: null,
+          successType: null,
+          successMessage: null,
+        });
+      }, 3000);
     } catch (error) {
       set({
         errorType: "deletePost",
         errorMessage: error.message,
         isLoading: false,
       });
+
+      setTimeout(() => {
+        set({
+          errorType: null,
+          errorMessage: null,
+          successType: null,
+          successMessage: null,
+        });
+      }, 3000);
     }
   },
 
@@ -203,7 +239,45 @@ export const beFriendService = create((set) => ({
     }
   },
 
+  addComment: async (postId, userId, content) => {
+    console.log("Adding comment:", postId, userId, content);
+
+    try {
+      const response = await fetch(`${API_URL}/add-comment`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ postId, userId, content }),
+      });
+
+      const data = await response.json();
+
+      if (response.status !== 201) {
+        set({
+          errorType: "addComment",
+          errorMessage: data.error,
+          isLoading: false,
+        });
+        throw new Error(data.error);
+      }
+
+      set({
+        successType: "addComment",
+        successMessage: data.message,
+        isLoading: false,
+      });
+    } catch (error) {
+      set({
+        errorType: "addComment",
+        errorMessage: error.message,
+        isLoading: false,
+      });
+    }
+  },
+
   getFriends: async (userId) => {
+    console.log("Getting friends:", userId);
     try {
       const response = await fetch(`${API_URL}/get-friends/${userId}`, {
         method: "GET",

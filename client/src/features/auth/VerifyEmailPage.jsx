@@ -33,6 +33,7 @@ const formSchema = z.object({
 export default function VerifyEmailPage() {
   const { verifyEmail, resendVerifyEmail, user, errorMessage, successMessage } =
     authService();
+  console.log({ user });
   const email = user.email;
 
   const form = useForm({

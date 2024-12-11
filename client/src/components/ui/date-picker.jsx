@@ -30,7 +30,10 @@ import {
 } from "./select";
 
 const DatePicker = React.forwardRef(
-  ({ className, value, onChange, startYear, endYear, ...props }, ref) => {
+  (
+    { className, value, onChange, startYear, endYear, disabled, ...props },
+    ref
+  ) => {
     const [date, setDate] = React.useState(new Date(value || new Date()));
 
     const months = [
@@ -87,6 +90,7 @@ const DatePicker = React.forwardRef(
                 !value && "text-muted-foreground",
                 className
               )}
+              disabled={disabled}
             >
               {value ? format(new Date(value), "PPP") : "Pick a date"}
               <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />

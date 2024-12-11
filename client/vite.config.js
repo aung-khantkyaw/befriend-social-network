@@ -10,8 +10,9 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  // server: {
-  //   port: process.env.PORT || 3000,
-  //   host: "0.0.0.0",
-  // },
+  server: {
+    // port: process.env.PORT || 3000,
+    port: 5173,
+    host: "0.0.0.0",
+  },
 });

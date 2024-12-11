@@ -16,24 +16,24 @@ export default function Newsfeed() {
     return <Loading />;
   }
 
-  function handleGetPosts() {
-    getFriendPosts(user?.id);
-    getPosts();
-    window.scrollTo(0, 0);
+  async function handleGetPosts() {
+    await getFriendPosts(user?.id);
+    await getPosts();
   }
 
+  console.log(allPosts);
   return (
     <div>
       <Header page="Newsfeed" />
       <div className="container mx-auto px-6">
-        <Tabs defaultValue="following" className="max-w-4xl mx-auto">
+        <Tabs defaultValue="for_you" className="max-w-4xl mx-auto">
           <div className="mb-4 flex justify-between">
             <TabsList>
-              <TabsTrigger value="following" onClick={handleGetPosts}>
-                Following
-              </TabsTrigger>
               <TabsTrigger value="for_you" onClick={handleGetPosts}>
                 For You
+              </TabsTrigger>
+              <TabsTrigger value="following" onClick={handleGetPosts}>
+                Following
               </TabsTrigger>
             </TabsList>
             <PostCreator />

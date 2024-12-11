@@ -29,34 +29,34 @@ export function AppSidebar({ ...props }) {
         title: "Home",
         url: "/",
       },
-      {
-        title: "Squads",
-        url: "/squads",
-        items: [
-          {
-            title: "Create Squad",
-            url: "/squads/create",
-          },
-          {
-            title: "My Squads",
-            url: "/squads/my-squads",
-          },
-        ],
-      },
-      {
-        title: "Channels",
-        url: "/channels",
-        items: [
-          {
-            title: "Create Channel",
-            url: "/channels/create",
-          },
-          {
-            title: "My Channels",
-            url: "/channels/my-channels",
-          },
-        ],
-      },
+      // {
+      //   title: "Squads",
+      //   url: "/squads",
+      //   items: [
+      //     {
+      //       title: "Create Squad",
+      //       url: "/squads/create",
+      //     },
+      //     {
+      //       title: "My Squads",
+      //       url: "/squads/my-squads",
+      //     },
+      //   ],
+      // },
+      // {
+      //   title: "Channels",
+      //   url: "/channels",
+      //   items: [
+      //     {
+      //       title: "Create Channel",
+      //       url: "/channels/create",
+      //     },
+      //     {
+      //       title: "My Channels",
+      //       url: "/channels/my-channels",
+      //     },
+      //   ],
+      // },
       {
         title: "Community",
         items: [
@@ -64,10 +64,10 @@ export function AppSidebar({ ...props }) {
             title: "Friend List",
             url: "/friends",
           },
-          {
-            title: "Chat",
-            url: "/chat",
-          },
+          // {
+          //   title: "Chat",
+          //   url: "/chat",
+          // },
           {
             title: "Notifications",
             url: "/notifications",
